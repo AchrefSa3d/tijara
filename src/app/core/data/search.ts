@@ -237,10 +237,10 @@ const swiper =[
   const video=[
     {
         id:1,
-        title:"Admin dashboard templates - Material Design for TIJARA",
-        siteLink:"https://themesbrand.com/TIJARA/index.html",
+        title:"Admin dashboard templates - Material Design for Velzon",
+        siteLink:"https://themesbrand.com/velzon/index.html",
         videoLink : "https://www.youtube.com/embed/GfSZtaoc5bw",
-        description :"TIJARA admin is super flexible, powerful, clean, modern & responsive admin template based on bootstrap 5 stable with unlimited possibilities. You can simply change to any layout or mode by changing a couple of lines of code. You can start small and large projects or update design in your existing project using TIJARA it is very quick and easy as it is beautiful, adroit, and delivers the ultimate user experience.",
+        description :"Velzon admin is super flexible, powerful, clean, modern & responsive admin template based on bootstrap 5 stable with unlimited possibilities. You can simply change to any layout or mode by changing a couple of lines of code. You can start small and large projects or update design in your existing project using Velzon it is very quick and easy as it is beautiful, adroit, and delivers the ultimate user experience.",
         likes:335,
         comments:102,
         auther :"Themesbrand"
@@ -248,19 +248,19 @@ const swiper =[
     {
         id:2,
         title:"Create Responsive Admin Dashboard using Html CSS",
-        siteLink:"https://themesbrand.com/TIJARA/index.html",
+        siteLink:"https://themesbrand.com/velzon/index.html",
         videoLink : "https://www.youtube.com/embed/Z-fV2lGKnnU",
-        description :"TIJARA admin is super flexible, powerful, clean, modern & responsive admin template based on bootstrap 5 stable with unlimited possibilities. You can simply change to any layout or mode by changing a couple of lines of code. You can start small and large projects or update design in your existing project using TIJARA it is very quick and easy as it is beautiful, adroit, and delivers the ultimate user experience.",
+        description :"Velzon admin is super flexible, powerful, clean, modern & responsive admin template based on bootstrap 5 stable with unlimited possibilities. You can simply change to any layout or mode by changing a couple of lines of code. You can start small and large projects or update design in your existing project using Velzon it is very quick and easy as it is beautiful, adroit, and delivers the ultimate user experience.",
         likes:485,
         comments:167,
         auther :"Themesbrand"
     },
     {
         id:3,
-        title:"TIJARA - The Most Popular Bootstrap 5 HTML, Angular & React Js Admin",
-        siteLink:"https://themesbrand.com/TIJARA/index.html",
+        title:"Velzon - The Most Popular Bootstrap 5 HTML, Angular & React Js Admin",
+        siteLink:"https://themesbrand.com/velzon/index.html",
         videoLink : "https://www.youtube.com/embed/1y_kfWUCFDQ",
-        description :"TIJARA admin is super flexible, powerful, clean, modern & responsive admin template based on bootstrap 5 stable with unlimited possibilities. You can simply change to any layout or mode by changing a couple of lines of code. You can start small and large projects or update design in your existing project using TIJARA it is very quick and easy as it is beautiful, adroit, and delivers the ultimate user experience.",
+        description :"Velzon admin is super flexible, powerful, clean, modern & responsive admin template based on bootstrap 5 stable with unlimited possibilities. You can simply change to any layout or mode by changing a couple of lines of code. You can start small and large projects or update design in your existing project using Velzon it is very quick and easy as it is beautiful, adroit, and delivers the ultimate user experience.",
         likes:122,
         comments:51,
         auther :"Themesbrand"

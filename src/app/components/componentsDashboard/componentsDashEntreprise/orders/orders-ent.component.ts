@@ -33,12 +33,12 @@ export class OrdersEntComponent implements OnInit {
       next: (data: any[]) => {
         this.allOrders = data.map(o => ({
           id:      o.id,
-          client:  o.client_name || o.client_email || 'Client',
+          client:  o.client_name || o.email || 'Client',
           ville:   o.shipping_address || '—',
-          product: o.deal_title  || '—',
-          total:   this.parsePrice(o.total_amount),
+          product: '—',
+          total:   o.total_amount || 0,
           status:  this.mapStatus(o.status),
-          date:    o.created_at ? new Date(o.created_at).toLocaleDateString('fr-FR') : '—',
+          date:    new Date(o.created_at).toLocaleDateString('fr-FR'),
           apiId:   o.id,
         }));
         this.loading = false;
@@ -46,12 +46,6 @@ export class OrdersEntComponent implements OnInit {
       },
       error: () => { this.loading = false; }
     });
-  }
-
-  private parsePrice(s: any): number {
-    if (!s || s === '—') return 0;
-    const m = String(s).match(/[\d.,]+/);
-    return m ? parseFloat(m[0].replace(',', '.')) : 0;
   }
 
   private mapStatus(s: string): string {
@@ -85,12 +79,9 @@ export class OrdersEntComponent implements OnInit {
   }
 
   changeStatus(order: any, status: string) {
-    const prev = order.status;
     order.status = status;
+    this.api.updateOrderStatus(order.apiId, this.statusToApi(status)).subscribe();
     this.applyFilter();
-    this.api.updateOrderStatus(order.apiId, this.statusToApi(status)).subscribe({
-      error: () => { order.status = prev; this.applyFilter(); }
-    });
   }
 
   getStatusClass(status: string): string {

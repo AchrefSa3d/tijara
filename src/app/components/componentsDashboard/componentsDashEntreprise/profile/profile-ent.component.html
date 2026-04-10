@@ -1,235 +1,235 @@
-<app-breadcrumbs [title]="'Mon Profil'" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<app-breadcrumbs [title]="'Mon Profil Vendeur'" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
 
-@if (loading) {
-  <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
-} @else {
-
-<!-- ── HEADER PROFIL ────────────────────────────────────────────────────────── -->
-<div class="profile-banner mb-4">
-  <div class="profile-banner-bg"></div>
-  <div class="profile-banner-content">
-    <!-- Photo -->
-    <div class="profile-avatar-wrap">
-      <div class="profile-avatar">
-        @if (profilePicture) {
-          <img [src]="profilePicture" alt="Photo" class="w-100 h-100 object-fit-cover rounded-circle">
-        } @else {
-          <span class="fw-bold text-white" style="font-size:36px">{{ initials }}</span>
-        }
+<!-- Stats rapides -->
+<div class="row g-3 mb-4">
+  @for (s of stats; track s.label) {
+    <div class="col-6 col-xl-3">
+      <div class="card border-0 shadow-sm text-center py-3">
+        <i class="{{ s.icon }} fs-24 text-{{ s.color }} mb-1"></i>
+        <h5 class="fw-bold mb-0">{{ s.value }}</h5>
+        <small class="text-muted">{{ s.label }}</small>
       </div>
-      <label class="profile-avatar-edit" title="Changer la photo">
-        <i class="ri-camera-line"></i>
-        <input type="file" accept="image/*" class="d-none" (change)="onPhotoSelected($event)">
-      </label>
     </div>
-    <!-- Info -->
-    <div class="profile-banner-info">
-      <h4 class="text-white fw-bold mb-1">{{ fi['firstName'].value }} {{ fi['lastName'].value }}</h4>
-      <span class="text-white opacity-75 fs-13">
-        <i class="ri-store-2-line me-1"></i>Vendeur
-        @if (fs['shopName'].value) { · {{ fs['shopName'].value }} }
-      </span>
-    </div>
-  </div>
+  }
 </div>
 
-<!-- ── Alertes ─────────────────────────────────────────────────────────────── -->
-@if (saveMsg) {
-  <div class="alert alert-success d-flex align-items-center gap-2 py-2 mb-3">
-    <i class="ri-check-circle-line fs-18"></i>{{ saveMsg }}
+<!-- Message succès -->
+@if (saveSuccess) {
+  <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
+    <i class="ri-check-circle-line fs-18"></i>
+    Profil mis à jour avec succès !
   </div>
 }
-@if (saveError) {
-  <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3">
-    <i class="ri-error-warning-line fs-18"></i>{{ saveError }}
+@if (pwdSuccess) {
+  <div class="alert alert-success d-flex align-items-center gap-2 mb-3">
+    <i class="ri-check-circle-line fs-18"></i>
+    Mot de passe modifié avec succès !
   </div>
 }
 
-<!-- ── ONGLETS ──────────────────────────────────────────────────────────────── -->
-<div class="card border-0 shadow-sm" style="border-radius:16px">
-  <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
-    <ul class="nav nav-tabs nav-tabs-custom gap-1">
+<div class="row g-4">
+
+  <!-- Avatar / Aperçu boutique -->
+  <div class="col-xl-3">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body py-4">
+        <!-- Avatar -->
+        <div class="mx-auto mb-3 rounded-circle bg-primary d-flex align-items-center justify-content-center text-white fw-bold"
+             style="width:80px;height:80px;font-size:2rem">
+          {{ f['firstName'].value?.[0] || 'V' }}
+        </div>
+        <h5 class="fw-semibold mb-0">{{ f['firstName'].value }} {{ f['lastName'].value }}</h5>
+        <p class="text-primary small fw-semibold mb-1">{{ f['shopName'].value }}</p>
+        <p class="text-muted small mb-3"><i class="ri-map-pin-line me-1"></i>{{ f['wilaya'].value }}</p>
+        <span class="badge bg-success-subtle text-success">
+          <i class="ri-store-2-line me-1"></i>Vendeur actif
+        </span>
+        <hr class="my-3">
+        <div class="text-start">
+          <p class="small text-muted mb-1"><i class="ri-mail-line me-2 text-primary"></i>{{ f['email'].value }}</p>
+          <p class="small text-muted mb-1"><i class="ri-phone-line me-2 text-primary"></i>{{ f['phone'].value }}</p>
+          <p class="small text-muted mb-0"><i class="ri-price-tag-3-line me-2 text-primary"></i>{{ f['category'].value }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Formulaires -->
+  <div class="col-xl-9">
+
+    <!-- Onglets -->
+    <ul class="nav nav-tabs mb-4">
       <li class="nav-item">
-        <button class="nav-link fs-13 fw-medium" [class.active]="activeTab==='infos'" (click)="activeTab='infos'">
-          <i class="ri-user-line me-1"></i>Informations personnelles
-        </button>
+        <a class="nav-link" [class.active]="activeTab==='infos'"
+           href="javascript:void(0)" (click)="activeTab='infos'">
+          <i class="ri-store-2-line me-1"></i>Infos boutique
+        </a>
       </li>
       <li class="nav-item">
-        <button class="nav-link fs-13 fw-medium" [class.active]="activeTab==='boutique'" (click)="activeTab='boutique'">
-          <i class="ri-store-2-line me-1"></i>Ma boutique
-        </button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link fs-13 fw-medium" [class.active]="activeTab==='securite'" (click)="activeTab='securite'">
+        <a class="nav-link" [class.active]="activeTab==='security'"
+           href="javascript:void(0)" (click)="activeTab='security'">
           <i class="ri-lock-line me-1"></i>Sécurité
-        </button>
+        </a>
       </li>
     </ul>
-  </div>
 
-  <div class="card-body p-4">
-
-    <!-- ─ INFOS PERSONNELLES ─────────────────────────────── -->
+    <!-- Onglet Infos -->
     @if (activeTab === 'infos') {
-      <form [formGroup]="infoForm" (ngSubmit)="saveInfos()">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label fw-semibold fs-13">Prénom <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" formControlName="firstName"
-                   placeholder="Votre prénom"
-                   [class.is-invalid]="submitted && fi['firstName'].invalid">
-            @if (submitted && fi['firstName'].errors?.['required']) {
-              <div class="invalid-feedback">Prénom requis.</div>
-            }
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold fs-13">Nom <span class="text-danger">*</span></label>
-            <input type="text" class="form-control" formControlName="lastName"
-                   placeholder="Votre nom"
-                   [class.is-invalid]="submitted && fi['lastName'].invalid">
-            @if (submitted && fi['lastName'].errors?.['required']) {
-              <div class="invalid-feedback">Nom requis.</div>
-            }
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold fs-13">Téléphone</label>
-            <div class="input-group">
-              <span class="input-group-text bg-white"><i class="ri-phone-line text-muted"></i></span>
-              <input type="tel" class="form-control" formControlName="phone" placeholder="Ex : 55123456">
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="mb-0"><i class="ri-edit-line me-2 text-primary"></i>Modifier mon profil</h5>
+        </div>
+        <div class="card-body">
+          <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+            <div class="row g-3">
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Prénom <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" formControlName="firstName"
+                       [class.is-invalid]="submitted && f['firstName'].errors">
+                @if (submitted && f['firstName'].errors) {
+                  <div class="invalid-feedback">Prénom requis</div>
+                }
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nom <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" formControlName="lastName"
+                       [class.is-invalid]="submitted && f['lastName'].errors">
+                @if (submitted && f['lastName'].errors) {
+                  <div class="invalid-feedback">Nom requis</div>
+                }
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control" formControlName="email"
+                       [class.is-invalid]="submitted && f['email'].errors">
+                @if (submitted && f['email'].errors) {
+                  <div class="invalid-feedback">Email valide requis</div>
+                }
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Téléphone <span class="text-danger">*</span></label>
+                <input type="tel" class="form-control" formControlName="phone" placeholder="06xxxxxxxx"
+                       [class.is-invalid]="submitted && f['phone'].errors">
+                @if (submitted && f['phone'].errors) {
+                  <div class="invalid-feedback">Numéro algérien requis (05/06/07...)</div>
+                }
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Nom de la boutique <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" formControlName="shopName"
+                       [class.is-invalid]="submitted && f['shopName'].errors">
+                @if (submitted && f['shopName'].errors) {
+                  <div class="invalid-feedback">Nom de boutique requis (min 3 car.)</div>
+                }
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Catégorie principale <span class="text-danger">*</span></label>
+                <select class="form-select" formControlName="category">
+                  @for (cat of categories; track cat) {
+                    <option [value]="cat">{{ cat }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Wilaya <span class="text-danger">*</span></label>
+                <select class="form-select" formControlName="wilaya">
+                  @for (w of wilayas; track w) {
+                    <option [value]="w">{{ w }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="col-md-6">
+                <label class="form-label fw-semibold">Site web (optionnel)</label>
+                <input type="url" class="form-control" formControlName="website" placeholder="https://...">
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Description de la boutique</label>
+                <textarea class="form-control" formControlName="description" rows="3"
+                          placeholder="Décrivez votre boutique..."></textarea>
+              </div>
+
+              <div class="col-12 d-flex justify-content-end gap-2">
+                <button type="button" class="btn btn-light" (click)="ngOnInit()">Annuler</button>
+                <button type="submit" class="btn btn-primary">
+                  <i class="ri-save-line me-1"></i>Enregistrer les modifications
+                </button>
+              </div>
+
             </div>
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold fs-13">Ville</label>
-            <select class="form-select" formControlName="city">
-              <option value="">— Sélectionner —</option>
-              @for (w of wilayas; track w) {
-                <option [value]="w">{{ w }}</option>
-              }
-            </select>
-          </div>
-          <div class="col-12">
-            <label class="form-label fw-semibold fs-13">Adresse complète</label>
-            <input type="text" class="form-control" formControlName="address"
-                   placeholder="Rue, immeuble, n°...">
-          </div>
+          </form>
         </div>
-        <div class="d-flex justify-content-end mt-4">
-          <button type="submit" class="btn btn-primary px-5" [disabled]="saving">
-            @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
-            Enregistrer
-          </button>
-        </div>
-      </form>
+      </div>
     }
 
-    <!-- ─ BOUTIQUE ───────────────────────────────────────── -->
-    @if (activeTab === 'boutique') {
-      <form [formGroup]="shopForm" (ngSubmit)="saveBoutique()">
-        <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label fw-semibold fs-13">Nom de la boutique <span class="text-danger">*</span></label>
-            <div class="input-group">
-              <span class="input-group-text bg-white"><i class="ri-store-2-line text-muted"></i></span>
-              <input type="text" class="form-control" formControlName="shopName"
-                     placeholder="Nom de votre boutique"
-                     [class.is-invalid]="shopSubmit && fs['shopName'].invalid">
-            </div>
-            @if (shopSubmit && fs['shopName'].errors?.['required']) {
-              <div class="text-danger fs-12 mt-1">Nom boutique requis.</div>
-            }
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold fs-13">N° de registre commercial</label>
-            <input type="text" class="form-control" formControlName="companyNumber"
-                   placeholder="Ex : TN12345678">
-          </div>
+    <!-- Onglet Sécurité -->
+    @if (activeTab === 'security') {
+      <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white border-bottom">
+          <h5 class="mb-0"><i class="ri-lock-password-line me-2 text-primary"></i>Changer le mot de passe</h5>
         </div>
-        <div class="d-flex justify-content-end mt-4">
-          <button type="submit" class="btn btn-primary px-5" [disabled]="saving">
-            @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
-            Enregistrer
-          </button>
-        </div>
-      </form>
-    }
+        <div class="card-body">
+          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+            <div class="row g-3" style="max-width:480px">
 
-    <!-- ─ SÉCURITÉ ────────────────────────────────────────── -->
-    @if (activeTab === 'securite') {
-      <form [formGroup]="pwdForm" (ngSubmit)="changePassword()">
-        <div class="row g-3" style="max-width:480px">
-          <div class="col-12">
-            <label class="form-label fw-semibold fs-13">Mot de passe actuel <span class="text-danger">*</span></label>
-            <div class="input-group">
-              <input [type]="showCurrentPwd ? 'text' : 'password'" class="form-control"
-                     formControlName="currentPwd" placeholder="••••••••"
-                     [class.is-invalid]="pwdSubmit && fp['currentPwd'].invalid">
-              <button type="button" class="btn btn-outline-secondary"
-                      (click)="showCurrentPwd=!showCurrentPwd">
-                <i class="{{ showCurrentPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
-              </button>
+              <div class="col-12">
+                <label class="form-label fw-semibold">Mot de passe actuel <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input [type]="showPwd ? 'text' : 'password'" class="form-control"
+                         formControlName="currentPwd"
+                         [class.is-invalid]="pwdSubmitted && fp['currentPwd'].errors">
+                  <button class="btn btn-outline-secondary" type="button" (click)="showPwd=!showPwd">
+                    <i class="ri-eye{{ showPwd ? '-off' : '' }}-line"></i>
+                  </button>
+                </div>
+                @if (pwdSubmitted && fp['currentPwd'].errors) {
+                  <div class="text-danger small mt-1">Champ requis</div>
+                }
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Nouveau mot de passe <span class="text-danger">*</span></label>
+                <div class="input-group">
+                  <input [type]="showNewPwd ? 'text' : 'password'" class="form-control"
+                         formControlName="newPwd"
+                         [class.is-invalid]="pwdSubmitted && fp['newPwd'].errors">
+                  <button class="btn btn-outline-secondary" type="button" (click)="showNewPwd=!showNewPwd">
+                    <i class="ri-eye{{ showNewPwd ? '-off' : '' }}-line"></i>
+                  </button>
+                </div>
+                @if (pwdSubmitted && fp['newPwd'].errors) {
+                  <div class="text-danger small mt-1">Min 6 caractères requis</div>
+                }
+              </div>
+
+              <div class="col-12">
+                <label class="form-label fw-semibold">Confirmer le mot de passe <span class="text-danger">*</span></label>
+                <input type="password" class="form-control" formControlName="confirmPwd"
+                       [class.is-invalid]="pwdMismatch">
+                @if (pwdMismatch) {
+                  <div class="text-danger small mt-1">Les mots de passe ne correspondent pas</div>
+                }
+              </div>
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                  <i class="ri-lock-password-line me-1"></i>Modifier le mot de passe
+                </button>
+              </div>
+
             </div>
-          </div>
-          <div class="col-12">
-            <label class="form-label fw-semibold fs-13">Nouveau mot de passe <span class="text-danger">*</span></label>
-            <div class="input-group">
-              <input [type]="showNewPwd ? 'text' : 'password'" class="form-control"
-                     formControlName="newPwd" placeholder="Min. 6 caractères"
-                     [class.is-invalid]="pwdSubmit && fp['newPwd'].invalid">
-              <button type="button" class="btn btn-outline-secondary"
-                      (click)="showNewPwd=!showNewPwd">
-                <i class="{{ showNewPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
-              </button>
-            </div>
-          </div>
-          <div class="col-12">
-            <label class="form-label fw-semibold fs-13">Confirmer le mot de passe <span class="text-danger">*</span></label>
-            <div class="input-group">
-              <input [type]="showConfirmPwd ? 'text' : 'password'" class="form-control"
-                     formControlName="confirmPwd" placeholder="Répétez le nouveau mot de passe"
-                     [class.is-invalid]="pwdMismatch">
-              <button type="button" class="btn btn-outline-secondary"
-                      (click)="showConfirmPwd=!showConfirmPwd">
-                <i class="{{ showConfirmPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
-              </button>
-            </div>
-            @if (pwdMismatch) {
-              <div class="text-danger fs-12 mt-1">Les mots de passe ne correspondent pas.</div>
-            }
-          </div>
+          </form>
         </div>
-        <div class="d-flex justify-content-end mt-4">
-          <button type="submit" class="btn btn-primary px-5" [disabled]="saving">
-            @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
-            Modifier le mot de passe
-          </button>
-        </div>
-      </form>
+      </div>
     }
 
   </div>
 </div>
-
-} <!-- end @if loading -->
-
-<style>
-.profile-banner { position:relative; border-radius:20px; overflow:hidden; height:180px; }
-.profile-banner-bg { position:absolute; inset:0; background:linear-gradient(135deg,#405189 0%,#0ab39c 100%); }
-.profile-banner-content { position:absolute; inset:0; display:flex; align-items:flex-end; gap:20px; padding:0 28px 24px; }
-.profile-avatar-wrap { position:relative; flex-shrink:0; }
-.profile-avatar {
-  width:88px; height:88px; border-radius:50%; border:3px solid #fff;
-  background:linear-gradient(135deg,#405189,#0ab39c);
-  display:flex; align-items:center; justify-content:center;
-  overflow:hidden;
-}
-.profile-avatar-edit {
-  position:absolute; bottom:0; right:0; width:26px; height:26px;
-  background:#fff; border-radius:50%; display:flex; align-items:center;
-  justify-content:center; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,.2);
-  font-size:13px; color:#405189;
-}
-.profile-banner-info { padding-bottom:4px; }
-.nav-tabs-custom { border-bottom:2px solid #e9ecef; }
-.nav-tabs-custom .nav-link { border:none; border-bottom:2px solid transparent; border-radius:0; padding:.6rem 1rem; color:#74788d; margin-bottom:-2px; }
-.nav-tabs-custom .nav-link.active { color:#405189; border-bottom-color:#405189; background:transparent; }
-</style>

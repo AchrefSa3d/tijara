@@ -6,7 +6,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "TIJARA": {
+    "velzon": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -24,7 +24,7 @@
           "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": {
-              "base": "dist/TIJARA"
+              "base": "dist/velzon"
             },
             "index": "src/index.html",
             "polyfills": [
@@ -138,10 +138,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "TIJARA:build:production"
+              "buildTarget": "velzon:build:production"
             },
             "development": {
-              "buildTarget": "TIJARA:build:development"
+              "buildTarget": "velzon:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -149,7 +149,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "buildTarget": "TIJARA:build"
+            "buildTarget": "velzon:build"
           }
         },
         "test": {

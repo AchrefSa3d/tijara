@@ -28,22 +28,15 @@ export class CartComponent implements OnInit {
 
   constructor(private router: Router) {}
 
-  private get cartKey(): string {
-    try {
-      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      return u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
-    } catch { return 'tijara_cart_guest'; }
-  }
-
   ngOnInit(): void { this.loadCart(); }
 
   loadCart() {
-    const saved = localStorage.getItem(this.cartKey);
+    const saved = sessionStorage.getItem('tijara_cart');
     this.cartItems = saved ? JSON.parse(saved) : [];
   }
 
   saveCart() {
-    localStorage.setItem(this.cartKey, JSON.stringify(this.cartItems));
+    sessionStorage.setItem('tijara_cart', JSON.stringify(this.cartItems));
   }
 
   increase(item: CartItem) {

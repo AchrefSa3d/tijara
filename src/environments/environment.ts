@@ -5,9 +5,7 @@
 export const environment = {
   production: false,
   defaultauth: 'fakebackend',
-  apiUrl: 'http://localhost:5000/api',
-  googleClientId: 'YOUR_GOOGLE_CLIENT_ID_HERE',
-  facebookAppId:  '0', // Remplacez par votre App ID Facebook (https://developers.facebook.com)
+  apiUrl: 'http://localhost:3000/api',
   firebaseConfig: {
     apiKey: '',
     authDomain: '',

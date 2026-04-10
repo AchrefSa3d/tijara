@@ -31,7 +31,7 @@ export class AuthenticationService {
     constructor(private http: HttpClient, private store: Store) {
         let storedUser: User | null = null;
         try {
-            const raw = localStorage.getItem('currentUser');
+            const raw = sessionStorage.getItem('currentUser');
             storedUser = raw ? JSON.parse(raw) : null;
         } catch { storedUser = null; }
         this.currentUserSubject = new BehaviorSubject<User>(storedUser as User);
@@ -100,19 +100,17 @@ export class AuthenticationService {
      * Logout the user
      */
     logout() {
-        // Nettoyer localStorage (stockage Tijara)
-        try {
-          const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
-          if (u?.id) localStorage.removeItem(`tijara_cart_${u.id}`);
-        } catch {}
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('token');
-        localStorage.removeItem('toast');
-        localStorage.removeItem('tijara_cart');
-        // Nettoyer sessionStorage par sécurité
-        sessionStorage.clear();
+        this.store.dispatch(logout());
+        // logout the user
+        // return getFirebaseBackend()!.logout();
+        sessionStorage.removeItem('currentUser');
+        sessionStorage.removeItem('token');
         this.currentUserSubject.next(null!);
-        return of(undefined);
+
+        return of(undefined).pipe(
+        
+        );
+
     }
 
     /**

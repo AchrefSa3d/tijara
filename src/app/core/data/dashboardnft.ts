@@ -27,7 +27,7 @@ const nftstatData = [{
 const nftfeaturedData = [
     {
         id: 1,
-        img: 'https://img.themesbrand.com/TIJARA/images/img-3.gif',
+        img: 'https://img.themesbrand.com/velzon/images/img-3.gif',
         likes: "37.41k",
         title: "Walking On Air",
         category: "Artwork",
@@ -45,7 +45,7 @@ const nftfeaturedData = [
     },
     {
         id: 3,
-        img: 'https://img.themesbrand.com/TIJARA/images/img-1.gif',
+        img: 'https://img.themesbrand.com/velzon/images/img-1.gif',
         likes: "8.42k",
         title: "Patterns Arts & Culture",
         category: "Artwork",
@@ -54,7 +54,7 @@ const nftfeaturedData = [
     },
     {
         id: 4,
-        img: 'https://img.themesbrand.com/TIJARA/images/img-4.gif',
+        img: 'https://img.themesbrand.com/velzon/images/img-4.gif',
         likes: "15.93k",
         title: "Evolved Reality",
         category: "Video",
@@ -82,7 +82,7 @@ const nftrecentData = [
     },
     {
         id: 2,
-        img: 'https://img.themesbrand.com/TIJARA/images/img-5.gif',
+        img: 'https://img.themesbrand.com/velzon/images/img-5.gif',
         title: "Long-tailed Macaque",
         category: "Games",
         icon: 'assets/images/svg/crypto-icons/ltc.svg',
@@ -168,7 +168,7 @@ const nfttopCollectionData = [
     },
     {
         id: 3,
-        img: 'https://img.themesbrand.com/TIJARA/images/img-5.gif',
+        img: 'https://img.themesbrand.com/velzon/images/img-5.gif',
         category: "3d Style",
         items: "4781+",
     },

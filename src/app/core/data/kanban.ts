@@ -24,7 +24,7 @@ const tasks  = [
     },
     {
       id: '#VL2436',
-      title: 'TIJARA - Admin Layout Design',
+      title: 'Velzon - Admin Layout Design',
       date: '07 Jan, 2022',
       content: 'The dashboard is the front page of the Administration UI.',
       progress: 0,

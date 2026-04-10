@@ -1,25 +1,20 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 export interface Product {
   id: number;
   name: string;
   category: string;
-  category_name?: string;
   price: number;
   oldPrice?: number;
   discount?: number;
   rating: number;
   reviewCount: number;
   image: string;
-  image_url?: string;
   badge?: string;
   badgeClass?: string;
   stock: number;
   vendor: string;
-  vendor_name?: string;
-  vendor_id?: number;
 }
 
 @Component({
@@ -41,67 +36,36 @@ export class ProductsComponent implements OnInit {
   sortBy = 'default';
   currentPage = 1;
   itemsPerPage = 9;
-  loading = true;
 
-  priceMin: number | null = null;
-  priceMax: number | null = null;
-  maxProductPrice = 5000;
+  categories = ['Tous', 'Électronique', 'Mode', 'Maison', 'Sport', 'Beauté', 'Jouets', 'Alimentation'];
 
-  categories: string[] = ['Tous'];
+  allProducts: Product[] = [
+    { id: 1,  name: 'Écouteurs Bluetooth Pro',     category: 'Électronique', price: 130,  oldPrice: 175,  discount: 25, rating: 4, reviewCount: 128, image: 'assets/images/products/img-1.png',  badge: 'Promo',     badgeClass: 'bg-danger',  stock: 15, vendor: 'TechTunis'    },
+    { id: 2,  name: 'Montre Connectée Sport',       category: 'Électronique', price: 250,  oldPrice: 310,  discount: 19, rating: 5, reviewCount: 84,  image: 'assets/images/products/img-2.png',  badge: 'Nouveau',   badgeClass: 'bg-success', stock: 8,  vendor: 'SmartGadget'  },
+    { id: 3,  name: 'Veste en Cuir Homme',          category: 'Mode',         price: 350,  oldPrice: 420,  discount: 17, rating: 4, reviewCount: 56,  image: 'assets/images/products/img-3.png',  badge: '',          badgeClass: '',           stock: 20, vendor: 'ModeTN'       },
+    { id: 4,  name: 'Canapé Modulable 3 Places',   category: 'Maison',       price: 1200, oldPrice: 1450, discount: 17, rating: 5, reviewCount: 32,  image: 'assets/images/products/img-4.png',  badge: 'Promo',     badgeClass: 'bg-danger',  stock: 3,  vendor: 'MaisonDeco'   },
+    { id: 5,  name: 'Vélo de Route Carbon',         category: 'Sport',        price: 950,  oldPrice: 1150, discount: 17, rating: 4, reviewCount: 47,  image: 'assets/images/products/img-5.png',  badge: '',          badgeClass: '',           stock: 5,  vendor: 'SportZone'    },
+    { id: 6,  name: 'Crème Hydratante Bio',         category: 'Beauté',       price: 25,   oldPrice: 35,   discount: 28, rating: 4, reviewCount: 210, image: 'assets/images/products/img-6.png',  badge: 'Bio',       badgeClass: 'bg-success', stock: 50, vendor: 'NatureCare'   },
+    { id: 7,  name: 'Tablette Enfant Éducative',    category: 'Jouets',       price: 150,  oldPrice: 190,  discount: 21, rating: 5, reviewCount: 98,  image: 'assets/images/products/img-7.png',  badge: 'Top vente', badgeClass: 'bg-warning', stock: 12, vendor: 'KidsWorld'    },
+    { id: 8,  name: 'Café Arabica Premium 500g',    category: 'Alimentation', price: 25,   oldPrice: 32,   discount: 21, rating: 5, reviewCount: 175, image: 'assets/images/products/img-8.png',  badge: 'Top vente', badgeClass: 'bg-warning', stock: 100,vendor: 'GourmetTN'    },
+    { id: 9,  name: 'Smartphone 128GB',             category: 'Électronique', price: 750,  oldPrice: 870,  discount: 13, rating: 4, reviewCount: 312, image: 'assets/images/products/img-9.png',  badge: '',          badgeClass: '',           stock: 25, vendor: 'TechTunis'    },
+    { id: 10, name: 'Sac à Main Femme Cuir',        category: 'Mode',         price: 200,  oldPrice: 260,  discount: 23, rating: 4, reviewCount: 67,  image: 'assets/images/products/img-10.png', badge: 'Promo',     badgeClass: 'bg-danger',  stock: 18, vendor: 'ModeTN'       },
+    { id: 11, name: 'Aspirateur Robot WiFi',        category: 'Maison',       price: 480,  oldPrice: 590,  discount: 18, rating: 5, reviewCount: 89,  image: 'assets/images/products/img-1.png',  badge: 'Nouveau',   badgeClass: 'bg-success', stock: 7,  vendor: 'MaisonDeco'   },
+    { id: 12, name: 'Tapis de Yoga Antidérapant',   category: 'Sport',        price: 50,   oldPrice: 70,   discount: 28, rating: 4, reviewCount: 143, image: 'assets/images/products/img-2.png',  badge: 'Promo',     badgeClass: 'bg-danger',  stock: 40, vendor: 'SportZone'    },
+  ];
 
-  allProducts: Product[] = [];
   filteredProducts: Product[] = [];
   cartItems: { product: Product; qty: number }[] = [];
 
-  constructor(private router: Router, private api: TijaraApiService) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
     this.loadCart();
-    this.loadProducts();
-  }
-
-  loadProducts(): void {
-    this.loading = true;
-    this.api.getProducts().subscribe({
-      next: (res: any) => {
-        const data = Array.isArray(res) ? res : (res.data || []);
-        this.allProducts = data.map((p: any) => ({
-          id:          p.id,
-          name:        p.name,
-          category:    p.category_name || 'Autre',
-          category_name: p.category_name,
-          price:       parseFloat(p.price),
-          rating:      p.avg_rating || 0,
-          reviewCount: p.review_count || 0,
-          image:       p.image_url || 'assets/images/products/img-1.png',
-          image_url:   p.image_url,
-          stock:       p.stock || 0,
-          vendor:      p.vendor_name || p.shop_name || 'Vendeur',
-          vendor_name: p.vendor_name,
-          vendor_id:   p.vendor_id,
-        }));
-        // Build category list from products
-        const cats = [...new Set(this.allProducts.map(p => p.category).filter(Boolean))];
-        this.categories = ['Tous', ...cats];
-        // Set max price slider ceiling
-        const prices = this.allProducts.map(p => p.price).filter(Boolean);
-        this.maxProductPrice = prices.length ? Math.ceil(Math.max(...prices) / 100) * 100 : 5000;
-        this.loading = false;
-        this.applyFilters();
-      },
-      error: () => { this.loading = false; }
-    });
-  }
-
-  private get cartKey(): string {
-    try {
-      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      return u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
-    } catch { return 'tijara_cart_guest'; }
+    this.applyFilters();
   }
 
   loadCart() {
-    const saved = localStorage.getItem(this.cartKey);
+    const saved = sessionStorage.getItem('tijara_cart');
     this.cartItems = saved ? JSON.parse(saved) : [];
   }
 
@@ -131,12 +95,6 @@ export class ProductsComponent implements OnInit {
         p.vendor.toLowerCase().includes(term)
       );
     }
-    if (this.priceMin !== null && this.priceMin > 0) {
-      result = result.filter(p => p.price >= this.priceMin!);
-    }
-    if (this.priceMax !== null && this.priceMax > 0) {
-      result = result.filter(p => p.price <= this.priceMax!);
-    }
     switch (this.sortBy) {
       case 'price_asc':  result.sort((a, b) => a.price - b.price); break;
       case 'price_desc': result.sort((a, b) => b.price - a.price); break;
@@ -152,29 +110,6 @@ export class ProductsComponent implements OnInit {
     this.applyFilters();
   }
 
-  resetFilters() {
-    this.searchTerm = '';
-    this.selectedCategory = 'Tous';
-    this.priceMin = null;
-    this.priceMax = null;
-    this.sortBy = 'default';
-    this.applyFilters();
-  }
-
-  get activeFilterCount(): number {
-    let count = 0;
-    if (this.selectedCategory !== 'Tous') count++;
-    if (this.searchTerm.trim()) count++;
-    if (this.priceMin) count++;
-    if (this.priceMax) count++;
-    return count;
-  }
-
-  categoryCount(cat: string): number {
-    if (cat === 'Tous') return this.allProducts.length;
-    return this.allProducts.filter(p => p.category === cat).length;
-  }
-
   getStars(rating: number): number[] {
     return Array.from({ length: 5 }, (_, i) => i + 1);
   }
@@ -182,7 +117,7 @@ export class ProductsComponent implements OnInit {
   addToCart(product: Product) {
     const existing = this.cartItems.find(i => i.product.id === product.id);
     if (existing) { existing.qty++; } else { this.cartItems.push({ product, qty: 1 }); }
-    localStorage.setItem(this.cartKey, JSON.stringify(this.cartItems));
+    sessionStorage.setItem('tijara_cart', JSON.stringify(this.cartItems));
     const btn = document.getElementById('cart-btn-' + product.id);
     if (btn) {
       btn.classList.add('btn-success');
@@ -200,7 +135,6 @@ export class ProductsComponent implements OnInit {
 
   goDetail(id: number) { this.router.navigate(['/shop/product-detail', id]); }
   goCart() { this.router.navigate(['/shop/cart']); }
-  goSeller(vendorId: number) { this.router.navigate(['/shop/seller-details', vendorId]); }
 
   get cartCount(): number {
     return this.cartItems.reduce((sum, i) => sum + i.qty, 0);

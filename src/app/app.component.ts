@@ -8,7 +8,7 @@ import { TranslateService } from '@ngx-translate/core';
     standalone: false
 })
 export class AppComponent {
-  title = 'TIJARA';
+  title = 'velzon';
 
   constructor( public translate  : TranslateService) {
     translate.setDefaultLang('fr');

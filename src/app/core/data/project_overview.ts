@@ -42,7 +42,7 @@ const projectDocument = [
   {
     icon: "ri-image-2-fill",
     icon_color: "danger",
-    name: 'TIJARA-logo.png',
+    name: 'Velzon-logo.png',
     type: 'PNG',
     size: '879',
     date: '02 Nov 2021',

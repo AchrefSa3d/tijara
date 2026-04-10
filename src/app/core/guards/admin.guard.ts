@@ -6,7 +6,7 @@ export class AdminGuard {
     constructor(private router: Router) {}
 
     canActivate(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): boolean {
-        const currentUser = localStorage.getItem('currentUser');
+        const currentUser = sessionStorage.getItem('currentUser');
         if (currentUser) {
             const user = JSON.parse(currentUser);
             if (user.role === 'admin') {

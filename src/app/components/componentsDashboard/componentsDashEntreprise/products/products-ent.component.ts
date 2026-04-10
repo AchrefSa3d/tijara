@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 @Component({
@@ -16,38 +15,27 @@ export class ProductsEntComponent implements OnInit {
     { label: 'Mes Produits', active: true }
   ];
 
-  products: any[]         = [];
+  products: any[] = [];
   filteredProducts: any[] = [];
-  categories: any[]       = [];
-  searchTerm              = '';
-  filterStatus            = 'tous';
-  showForm                = false;
-  editMode                = false;
-  selectedProduct: any    = null;
+  categories: any[] = [];
+  searchTerm = '';
+  filterStatus = 'tous';
+  showForm = false;
+  editMode = false;
+  selectedProduct: any = null;
   productForm!: FormGroup;
-  loading                 = true;
-  saving                  = false;
-  saveError               = '';
-  imagePreview            = '';
-  deleteConfirmId: number | null = null;
+  loading = true;
+  saving = false;
+  saveError = '';
+  imagePreview = '';
 
-  constructor(
-    private fb: FormBuilder,
-    private api: TijaraApiService,
-    private route: ActivatedRoute
-  ) {}
+  constructor(private fb: FormBuilder, private api: TijaraApiService) {}
 
   ngOnInit(): void {
     this.initForm();
     this.loadProducts();
     this.api.getCategories().subscribe({
       next: (data: any[]) => { this.categories = data; }
-    });
-    // Auto-open form when navigating from "Ajouter un produit" menu item
-    this.route.queryParams.subscribe(params => {
-      if (params['action'] === 'add') {
-        setTimeout(() => this.openAdd(), 300);
-      }
     });
   }
 
@@ -58,14 +46,14 @@ export class ProductsEntComponent implements OnInit {
         this.products = data.map(p => ({
           id:             p.id,
           name:           p.name,
-          description:    p.description || '',
-          category:       p.category_name || p.category || '—',
+          category:       p.category_name || '—',
           categoryId:     p.category_id,
-          price:          +p.price,
-          stock:          p.stock ?? 0,
-          status:         p.status || (p.active === 1 ? 'actif' : 'inactif'),
-          approvalStatus: p.approval_status || 'approved',
-          image:          p.image_url || p.image || null,
+          price:          p.price,
+          stock:          p.stock,
+          status:         p.is_active ? 'actif' : 'inactif',
+          approvalStatus: p.approval_status || 'pending',
+          sales:          0,
+          image:          p.image_url || null,
         }));
         this.loading = false;
         this.applyFilter();
@@ -77,10 +65,10 @@ export class ProductsEntComponent implements OnInit {
   initForm(p?: any) {
     this.productForm = this.fb.group({
       name:        [p?.name        || '', [Validators.required, Validators.minLength(3)]],
-      description: [p?.description || '', [Validators.required, Validators.minLength(10)]],
-      category_id: [p?.categoryId  || null],
-      price:       [p?.price       || '', [Validators.required, Validators.min(0.1)]],
+      category_id: [p?.categoryId  || '', Validators.required],
+      price:       [p?.price       || '', [Validators.required, Validators.min(1)]],
       stock:       [p?.stock       ?? 0,  [Validators.required, Validators.min(0)]],
+      status:      [p?.status      || 'actif'],
     });
   }
 
@@ -91,47 +79,35 @@ export class ProductsEntComponent implements OnInit {
     if (this.filterStatus !== 'tous') list = list.filter(p => p.status === this.filterStatus);
     if (this.searchTerm.trim()) {
       const t = this.searchTerm.toLowerCase();
-      list = list.filter(p =>
-        p.name.toLowerCase().includes(t) ||
-        p.category.toLowerCase().includes(t) ||
-        (p.description || '').toLowerCase().includes(t)
-      );
+      list = list.filter(p => p.name.toLowerCase().includes(t) || p.category.toLowerCase().includes(t));
     }
     this.filteredProducts = list;
   }
 
   openAdd() {
-    this.editMode       = false;
+    this.editMode = false;
     this.selectedProduct = null;
-    this.imagePreview   = '';
-    this.saveError      = '';
+    this.imagePreview = '';
+    this.saveError = '';
     this.initForm();
     this.showForm = true;
-    setTimeout(() => document.getElementById('productNameInput')?.focus(), 100);
   }
 
   openEdit(p: any) {
-    this.editMode        = true;
+    this.editMode = true;
     this.selectedProduct = p;
-    this.imagePreview    = p.image || '';
-    this.saveError       = '';
+    this.imagePreview = p.image || '';
+    this.saveError = '';
     this.initForm(p);
     this.showForm = true;
-  }
-
-  cancelForm() {
-    this.showForm        = false;
-    this.selectedProduct = null;
-    this.imagePreview    = '';
-    this.saveError       = '';
   }
 
   onImageSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (!input.files?.length) return;
     const file = input.files[0];
-    if (file.size > 3 * 1024 * 1024) {
-      alert('Image trop grande. Maximum 3 MB.');
+    if (file.size > 2 * 1024 * 1024) {
+      alert('Image trop grande. Maximum 2 MB.');
       input.value = '';
       return;
     }
@@ -143,29 +119,25 @@ export class ProductsEntComponent implements OnInit {
   removeImage(): void { this.imagePreview = ''; }
 
   saveProduct() {
-    this.productForm.markAllAsTouched();
     if (this.productForm.invalid) return;
-
-    const val     = this.productForm.value;
-    const priceStr = val.price ? `${(+val.price).toFixed(3)} TND` : '';
+    const val = this.productForm.value;
     const payload = {
-      // Champs attendus par l'API (CreateDealRequest)
-      title_deal:       val.name?.trim(),
-      description_deal: val.description?.trim(),
-      price_deal:       priceStr,
-      quantity:         String(val.stock ?? 0),
-      id_categ:         val.category_id ? +val.category_id : null,
-      image_deal:       this.imagePreview || null,
+      name:        val.name,
+      category_id: val.category_id ? parseInt(val.category_id) : null,
+      price:       parseFloat(val.price),
+      stock:       parseInt(val.stock),
+      is_active:   val.status === 'actif' ? 1 : 0,
+      image_url:   this.imagePreview || null,
     };
 
-    this.saving    = true;
+    this.saving   = true;
     this.saveError = '';
 
     if (this.editMode && this.selectedProduct) {
       this.api.updateProduct(this.selectedProduct.id, payload).subscribe({
         next: () => { this.saving = false; this.showForm = false; this.loadProducts(); },
         error: (err: any) => {
-          this.saving    = false;
+          this.saving = false;
           this.saveError = err?.error?.message || 'Erreur lors de la modification.';
         }
       });
@@ -173,53 +145,32 @@ export class ProductsEntComponent implements OnInit {
       this.api.createProduct(payload).subscribe({
         next: () => { this.saving = false; this.showForm = false; this.loadProducts(); },
         error: (err: any) => {
-          this.saving    = false;
-          this.saveError = err?.error?.message || 'Erreur lors de l\'ajout.';
+          this.saving = false;
+          this.saveError = err?.error?.message || 'Erreur lors de l\'ajout. Vérifiez que le backend est démarré.';
         }
       });
     }
   }
 
   toggleStatus(p: any) {
-    this.api.toggleProductStatus(p.id).subscribe({
-      next: () => {
-        p.status = p.status === 'actif' ? 'inactif' : 'actif';
-        this.applyFilter();
-      },
-      error: (err: any) => {
-        console.error('Erreur toggle statut:', err);
-      }
+    const newStatus = p.status === 'actif' ? 'inactif' : 'actif';
+    this.api.updateProduct(p.id, { is_active: newStatus === 'actif' ? 1 : 0 }).subscribe({
+      next: () => { p.status = newStatus; this.applyFilter(); }
     });
   }
-
-  confirmDelete(id: number) { this.deleteConfirmId = id; }
-  cancelDelete()            { this.deleteConfirmId = null; }
 
   deleteProduct(id: number) {
-    this.api.deleteProduct(id).subscribe({
-      next: () => {
-        this.products = this.products.filter(p => p.id !== id);
-        this.applyFilter();
-        this.deleteConfirmId = null;
-      }
-    });
+    if (confirm('Supprimer ce produit ?')) {
+      this.api.deleteProduct(id).subscribe({
+        next: () => {
+          this.products = this.products.filter(p => p.id !== id);
+          this.applyFilter();
+        }
+      });
+    }
   }
 
-  get pendingCount()  { return this.products.filter(p => p.approvalStatus === 'pending').length; }
   get activeCount()   { return this.products.filter(p => p.status === 'actif').length; }
   get inactiveCount() { return this.products.filter(p => p.status === 'inactif').length; }
-
-  getApprovalBadge(status: string): string {
-    const m: Record<string, string> = {
-      approved: 'badge bg-success-subtle text-success',
-      pending:  'badge bg-warning-subtle text-warning',
-      rejected: 'badge bg-danger-subtle text-danger',
-    };
-    return m[status] || 'badge bg-secondary-subtle text-secondary';
-  }
-
-  getApprovalLabel(status: string): string {
-    const m: Record<string, string> = { approved: 'Approuvé', pending: 'En attente', rejected: 'Refusé' };
-    return m[status] || status;
-  }
+  get totalSales()    { return this.products.reduce((s, p) => s + (p.sales || 0), 0); }
 }

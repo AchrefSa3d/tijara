@@ -1,318 +1,219 @@
-<app-breadcrumbs [title]="'Mes Annonces'" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
+<app-breadcrumbs [title]="'Annonces & Deals'" [breadcrumbItems]="breadCrumbItems"></app-breadcrumbs>
 
-<!-- Success alert -->
 @if (submitSuccess) {
-  <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 mb-4 rounded-3">
-    <i class="ri-checkbox-circle-fill fs-18"></i>
-    <span>{{ submitSuccess }}</span>
-  </div>
+<div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 mb-4">
+  <i class="ri-checkbox-circle-line fs-18"></i>{{ submitSuccess }}
+</div>
 }
 
-<!-- ── STATS HEADER ── -->
-<div class="row g-3 mb-4">
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#405189;border-radius:12px">
-        <i class="ri-megaphone-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0">{{ myAnnonces.length }}</h3>
-      <small class="text-muted">Total</small>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#0ab39c;border-radius:12px">
-        <i class="ri-checkbox-circle-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0 text-success">{{ countByStatus('approved') }}</h3>
-      <small class="text-muted">Approuvées</small>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#f7b84b;border-radius:12px">
-        <i class="ri-time-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0 text-warning">{{ countByStatus('pending') }}</h3>
-      <small class="text-muted">En attente</small>
-    </div>
-  </div>
-  <div class="col-6 col-md-3">
-    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#f06548;border-radius:12px">
-        <i class="ri-close-circle-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0 text-danger">{{ countByStatus('rejected') }}</h3>
-      <small class="text-muted">Rejetées</small>
-    </div>
-  </div>
-</div>
-
-<!-- ── TOOLBAR ── -->
-<div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
-  <div class="d-flex gap-1 p-1 rounded-3" style="background:#f0f2f7">
-    <button class="btn btn-sm px-4 py-2 fw-medium rounded-2"
-            [style.background]="activeTab==='miennes' ? '#fff' : 'transparent'"
-            [style.color]="activeTab==='miennes' ? '#405189' : '#6c757d'"
-            [style.box-shadow]="activeTab==='miennes' ? '0 2px 8px rgba(0,0,0,.08)' : 'none'"
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+  <div class="d-flex gap-2">
+    <button class="btn btn-sm rounded-pill px-3"
+            [class.btn-primary]="activeTab==='miennes'"
+            [class.btn-outline-secondary]="activeTab!=='miennes'"
             (click)="activeTab='miennes'">
       <i class="ri-store-2-line me-1"></i>Mes publications
-      @if (myAnnonces.length > 0) {
-        <span class="badge ms-1 rounded-pill" style="background:#405189;font-size:10px">{{ myAnnonces.length }}</span>
-      }
     </button>
-    <button class="btn btn-sm px-4 py-2 fw-medium rounded-2"
-            [style.background]="activeTab==='toutes' ? '#fff' : 'transparent'"
-            [style.color]="activeTab==='toutes' ? '#405189' : '#6c757d'"
-            [style.box-shadow]="activeTab==='toutes' ? '0 2px 8px rgba(0,0,0,.08)' : 'none'"
+    <button class="btn btn-sm rounded-pill px-3"
+            [class.btn-primary]="activeTab==='toutes'"
+            [class.btn-outline-secondary]="activeTab!=='toutes'"
             (click)="activeTab='toutes'">
       <i class="ri-global-line me-1"></i>Fil public
     </button>
   </div>
-  <button class="btn btn-primary px-4 py-2 rounded-3 fw-medium" (click)="showForm=!showForm">
-    <i class="ri-add-line me-2"></i>Nouvelle annonce
+  <button class="btn btn-primary" (click)="showForm=!showForm">
+    <i class="ri-add-line me-1"></i>Nouvelle publication
   </button>
 </div>
 
-<!-- ── FORM ── -->
+<!-- Formulaire création -->
 @if (showForm) {
-  <div class="card border-0 shadow mb-4 rounded-4 overflow-hidden">
-    <div class="px-4 py-3 d-flex align-items-center gap-2"
-         style="background:linear-gradient(90deg,#405189,#3a4caa)">
-      <i class="ri-megaphone-line text-white fs-18"></i>
-      <h6 class="fw-bold text-white mb-0">Créer une nouvelle annonce</h6>
-      <button class="btn btn-sm ms-auto text-white opacity-75"
-              style="background:rgba(255,255,255,.15);border-radius:8px"
-              (click)="showForm=false"><i class="ri-close-line"></i></button>
-    </div>
-    <div class="card-body p-4">
-      <form [formGroup]="annonceForm" (ngSubmit)="submit()">
-        <div class="row g-4">
-          <div class="col-12">
-            <label class="form-label fw-semibold">Titre <span class="text-danger">*</span></label>
-            <input type="text" class="form-control form-control-lg rounded-3" formControlName="title"
-                   placeholder="Ex: Promo spéciale été — -30% sur toute la collection..."
-                   [class.is-invalid]="f['title'].invalid && f['title'].touched">
-            <div class="invalid-feedback">Minimum 5 caractères.</div>
-          </div>
-          <div class="col-12">
-            <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
-            <textarea class="form-control rounded-3" rows="4" formControlName="content"
-                      placeholder="Décrivez votre annonce en détail..."
-                      [class.is-invalid]="f['content'].invalid && f['content'].touched"></textarea>
-            <div class="invalid-feedback">Minimum 10 caractères.</div>
-          </div>
-          <div class="col-12">
-            <label class="form-label fw-semibold">Image (optionnel)</label>
-            <div class="d-flex align-items-start gap-3">
-              <div class="rounded-3 overflow-hidden border d-flex align-items-center justify-content-center flex-shrink-0"
-                   style="width:100px;height:100px;background:#f8f9fa">
-                @if (imagePreview) {
-                  <img [src]="imagePreview" class="w-100 h-100" style="object-fit:cover">
-                } @else {
-                  <i class="ri-image-add-line fs-2 text-muted"></i>
-                }
-              </div>
-              <div class="d-flex flex-column gap-2 justify-content-center" style="padding-top:8px">
-                <label for="annImg" class="btn btn-outline-primary rounded-3" style="cursor:pointer;width:fit-content">
-                  <i class="ri-upload-cloud-2-line me-1"></i>Choisir une image
-                </label>
-                <input type="file" id="annImg" class="d-none" accept="image/*" (change)="onImageSelected($event)">
-                @if (imagePreview) {
-                  <button type="button" class="btn btn-outline-danger btn-sm rounded-3" (click)="imagePreview=''">
-                    <i class="ri-delete-bin-line me-1"></i>Supprimer
-                  </button>
-                }
-                <span class="text-muted fs-12">JPG, PNG, WEBP · Max 2 MB</span>
-              </div>
+<div class="card border-0 shadow mb-4" style="border-left:4px solid #405189!important">
+  <div class="card-body p-4">
+    <h5 class="fw-bold mb-3"><i class="ri-megaphone-line me-2 text-primary"></i>Nouvelle publication</h5>
+    <form [formGroup]="annonceForm" (ngSubmit)="submit()">
+      <div class="row g-3">
+        <!-- Type -->
+        <div class="col-12">
+          <label class="form-label fw-medium">Type de publication</label>
+          <div class="d-flex gap-3">
+            <div class="form-check">
+              <input class="form-check-input" type="radio" formControlName="type" value="annonce" id="typeAnn">
+              <label class="form-check-label" for="typeAnn">
+                <i class="ri-megaphone-line me-1 text-primary"></i>Annonce
+              </label>
             </div>
-          </div>
-          @if (submitError) {
-            <div class="col-12">
-              <div class="alert alert-danger rounded-3 py-2 fs-13 mb-0">
-                <i class="ri-error-warning-line me-1"></i>{{ submitError }}
-              </div>
-            </div>
-          }
-          <div class="col-12 d-flex gap-3">
-            <button type="submit" class="btn btn-primary px-5 py-2 rounded-3 fw-medium"
-                    [disabled]="annonceForm.invalid || submitting">
-              @if (submitting) { <span class="spinner-border spinner-border-sm me-2"></span> }
-              <i class="ri-send-plane-line me-1"></i>Soumettre pour validation
-            </button>
-            <button type="button" class="btn btn-outline-secondary px-4 rounded-3" (click)="showForm=false">
-              Annuler
-            </button>
-          </div>
-        </div>
-      </form>
-    </div>
-  </div>
-}
-
-<!-- ── MES PUBLICATIONS ── -->
-@if (activeTab === 'miennes') {
-  @if (loading) {
-    <div class="text-center py-5">
-      <div class="spinner-border text-primary" style="width:2.5rem;height:2.5rem"></div>
-    </div>
-  } @else if (myAnnonces.length === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="card-body text-center py-5">
-        <i class="ri-megaphone-line display-4 d-block mb-3 text-muted opacity-25"></i>
-        <h5 class="fw-semibold">Aucune annonce publiée</h5>
-        <p class="text-muted fs-14 mb-4">Créez votre première annonce pour informer vos clients.</p>
-        <button class="btn btn-primary px-4 rounded-3" (click)="showForm=true">
-          <i class="ri-add-line me-1"></i>Créer une annonce
-        </button>
-      </div>
-    </div>
-  } @else {
-    <div class="row g-4">
-      @for (ann of myAnnonces; track ann.id) {
-        <div class="col-lg-6">
-          <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
-            <!-- Card header stripe -->
-            <div class="px-4 pt-4 pb-3">
-              <div class="d-flex justify-content-between align-items-start gap-2">
-                <div class="flex-fill">
-                  <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
-                    <span class="badge rounded-pill px-3 py-1 {{ getStatusClass(ann.status) }}">
-                      @if (ann.status === 'approved') { <i class="ri-checkbox-circle-line me-1"></i> }
-                      @if (ann.status === 'pending')  { <i class="ri-time-line me-1"></i> }
-                      @if (ann.status === 'rejected') { <i class="ri-close-circle-line me-1"></i> }
-                      {{ getStatusLabel(ann.status) }}
-                    </span>
-                    <span class="badge bg-primary-subtle text-primary rounded-pill px-3 py-1 fs-11">
-                      <i class="ri-megaphone-line me-1"></i>Annonce
-                    </span>
-                  </div>
-                  <h5 class="fw-bold mb-1 fs-16">{{ ann.title }}</h5>
-                  @if (ann.status === 'pending') {
-                    <div class="text-warning fs-12 mb-1">
-                      <i class="ri-information-line me-1"></i>En attente de validation admin
-                    </div>
-                  }
-                  @if (ann.status === 'rejected' && ann.rejection_reason) {
-                    <div class="text-danger fs-12 mb-1">
-                      <i class="ri-error-warning-line me-1"></i>{{ ann.rejection_reason }}
-                    </div>
-                  }
-                </div>
-                <button class="btn btn-sm btn-outline-danger rounded-3 flex-shrink-0"
-                        (click)="deleteAnnonce(ann.id)" title="Supprimer">
-                  <i class="ri-delete-bin-line"></i>
-                </button>
-              </div>
-            </div>
-
-            @if (ann.image_url) {
-              <div style="height:180px;overflow:hidden">
-                <img [src]="ann.image_url" class="w-100 h-100" style="object-fit:cover">
-              </div>
-            }
-
-            <div class="px-4 py-3">
-              <p class="text-muted fs-13 mb-0" style="line-height:1.65">{{ ann.content }}</p>
-            </div>
-
-            <div class="px-4 py-3 border-top d-flex align-items-center gap-4 text-muted fs-13 mt-auto">
-              <span><i class="ri-heart-3-line me-1 text-danger"></i>{{ ann.likes_count || 0 }}</span>
-              <span><i class="ri-chat-3-line me-1 text-primary"></i>{{ ann.comments_count || 0 }}</span>
-              <span class="ms-auto"><i class="ri-calendar-line me-1"></i>{{ ann.created_at | date:'dd MMM yyyy' }}</span>
+            <div class="form-check">
+              <input class="form-check-input" type="radio" formControlName="type" value="deal" id="typeDeal">
+              <label class="form-check-label" for="typeDeal">
+                <i class="ri-price-tag-3-line me-1 text-warning"></i>Deal / Offre promo
+              </label>
             </div>
           </div>
         </div>
-      }
-    </div>
-  }
-}
-
-<!-- ── FIL PUBLIC ── -->
-@if (activeTab === 'toutes') {
-  @if (publicAnnonces.length === 0) {
-    <div class="card border-0 shadow-sm rounded-4">
-      <div class="card-body text-center py-5">
-        <i class="ri-newspaper-line display-4 d-block mb-3 text-muted opacity-25"></i>
-        <h5 class="fw-semibold">Aucune annonce publique</h5>
-        <p class="text-muted fs-14">Les annonces approuvées apparaîtront ici.</p>
-      </div>
-    </div>
-  } @else {
-    <div class="row g-4">
-      @for (ann of publicAnnonces; track ann.id) {
-        <div class="col-lg-6">
-          <div class="card border-0 shadow-sm rounded-4 h-100">
-            @if (ann.image_url) {
-              <div style="height:200px;overflow:hidden;border-radius:16px 16px 0 0">
-                <img [src]="ann.image_url" class="w-100 h-100" style="object-fit:cover">
-              </div>
-            }
-            <div class="card-body p-4">
-              <div class="d-flex align-items-center gap-3 mb-3">
-                <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold flex-shrink-0"
-                     style="width:42px;height:42px;background:linear-gradient(135deg,#405189,#0ab39c)">
-                  {{ ann.author_name?.[0] || '?' }}
-                </div>
-                <div>
-                  <div class="fw-semibold fs-14">{{ ann.author_name }}</div>
-                  <div class="text-muted fs-12">
-                    {{ ann.shop_name || 'Vendeur' }} · {{ ann.created_at | date:'dd MMM yyyy' }}
-                  </div>
-                </div>
-                <span class="badge bg-primary-subtle text-primary ms-auto rounded-pill px-3 fs-11">
-                  <i class="ri-megaphone-line me-1"></i>Annonce
-                </span>
-              </div>
-              <h5 class="fw-bold mb-2 fs-16">{{ ann.title }}</h5>
-              <p class="text-muted fs-13 mb-3" style="line-height:1.7">{{ ann.content }}</p>
-              <div class="d-flex align-items-center gap-2 pt-3 border-top">
-                <button class="btn btn-sm rounded-pill px-3 gap-2 d-flex align-items-center"
-                        style="background:#fff0f0;color:#e74c3c;border:1px solid #ffd5d5"
-                        (click)="like(ann)">
-                  <i class="ri-heart-3-line"></i>
-                  <span>{{ ann.likes_count || 0 }}</span>
-                </button>
-                <button class="btn btn-sm rounded-pill px-3 gap-2 d-flex align-items-center"
-                        style="background:#f0f4ff;color:#405189;border:1px solid #dce4ff"
-                        (click)="toggleComments(ann)">
-                  <i class="ri-chat-3-line"></i>
-                  <span>{{ ann.comments_count || 0 }}</span>
-                </button>
-              </div>
-              @if (expandedComments[ann.id]) {
-                <div class="mt-3 pt-3 border-top">
-                  @for (c of (comments[ann.id] || []); track c.id) {
-                    <div class="d-flex gap-2 mb-3">
-                      <div class="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center flex-shrink-0 fw-bold text-secondary"
-                           style="width:32px;height:32px;font-size:12px">
-                        {{ c.author_name?.[0] || '?' }}
-                      </div>
-                      <div class="flex-fill bg-light rounded-3 px-3 py-2">
-                        <div class="fw-semibold fs-12 text-dark">{{ c.author_name }}</div>
-                        <div class="fs-13 text-muted mt-1">{{ c.content }}</div>
-                      </div>
-                    </div>
-                  }
-                  <div class="d-flex gap-2 mt-2">
-                    <input type="text" class="form-control form-control-sm rounded-pill"
-                           placeholder="Ajouter un commentaire..."
-                           [(ngModel)]="commentText[ann.id]"
-                           (keyup.enter)="postComment(ann)">
-                    <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="postComment(ann)">
-                      <i class="ri-send-plane-line"></i>
-                    </button>
-                  </div>
-                </div>
+        <div class="col-12">
+          <label class="form-label fw-medium">Titre <span class="text-danger">*</span></label>
+          <input type="text" class="form-control" formControlName="title"
+                 placeholder="Ex: Promo -30% sur tous les smartphones..."
+                 [class.is-invalid]="f['title'].invalid && f['title'].touched">
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-medium">Description <span class="text-danger">*</span></label>
+          <textarea class="form-control" rows="4" formControlName="content"
+                    placeholder="Détaillez votre annonce ou offre..."
+                    [class.is-invalid]="f['content'].invalid && f['content'].touched"></textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label fw-medium">Image (optionnel)</label>
+          <div class="d-flex align-items-start gap-3">
+            <div class="border rounded-3 d-flex align-items-center justify-content-center overflow-hidden flex-shrink-0"
+                 style="width:80px;height:80px;background:#f8f9fa">
+              @if (imagePreview) {
+                <img [src]="imagePreview" style="width:100%;height:100%;object-fit:cover" alt="">
+              } @else {
+                <i class="ri-image-add-line fs-22 text-muted"></i>
+              }
+            </div>
+            <div>
+              <label for="entImg" class="btn btn-sm btn-outline-secondary" style="cursor:pointer">
+                <i class="ri-upload-cloud-2-line me-1"></i>Choisir
+              </label>
+              <input type="file" id="entImg" class="d-none" accept="image/*" (change)="onImageSelected($event)">
+              @if (imagePreview) {
+                <button type="button" class="btn btn-sm btn-soft-danger ms-2" (click)="imagePreview=''">Supprimer</button>
               }
             </div>
           </div>
         </div>
-      }
+        @if (submitError) {
+          <div class="col-12"><div class="alert alert-danger py-2 fs-13">{{ submitError }}</div></div>
+        }
+        <div class="col-12 d-flex gap-2">
+          <button type="submit" class="btn btn-primary px-4" [disabled]="annonceForm.invalid || submitting">
+            @if (submitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+            <i class="ri-send-plane-line me-1"></i>Soumettre pour validation
+          </button>
+          <button type="button" class="btn btn-soft-secondary" (click)="showForm=false">Annuler</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+}
+
+<!-- Mes publications -->
+@if (activeTab === 'miennes') {
+  @if (loading) {
+    <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+  } @else if (myAnnonces.length === 0) {
+    <div class="text-center py-5">
+      <i class="ri-megaphone-line display-3 text-muted"></i>
+      <p class="text-muted mt-2">Aucune publication. Créez votre première annonce ou deal !</p>
+    </div>
+  } @else {
+    @for (ann of myAnnonces; track ann.id) {
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <div class="flex-fill">
+              <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <h6 class="fw-bold mb-0">{{ ann.title }}</h6>
+                <span class="badge {{ getStatusClass(ann.status) }}">{{ getStatusLabel(ann.status) }}</span>
+                @if (ann.type === 'deal') {
+                  <span class="badge bg-warning-subtle text-warning">
+                    <i class="ri-price-tag-3-line me-1"></i>Deal
+                  </span>
+                }
+              </div>
+              @if (ann.status === 'rejected' && ann.rejection_reason) {
+                <div class="text-danger fs-12 mb-1"><i class="ri-error-warning-line me-1"></i>{{ ann.rejection_reason }}</div>
+              }
+              @if (ann.status === 'pending') {
+                <div class="text-warning fs-12 mb-1"><i class="ri-time-line me-1"></i>En attente de validation par l'administrateur</div>
+              }
+              <p class="text-muted fs-13 mb-1">{{ ann.content }}</p>
+              @if (ann.image_url) {
+                <img [src]="ann.image_url" class="rounded-3 mb-2" style="max-height:200px;max-width:100%;object-fit:cover">
+              }
+              <div class="d-flex gap-3 mt-2 text-muted fs-12">
+                <span><i class="ri-heart-line me-1"></i>{{ ann.likes_count }}</span>
+                <span><i class="ri-chat-3-line me-1"></i>{{ ann.comments_count }}</span>
+                <span><i class="ri-calendar-line me-1"></i>{{ ann.created_at | date:'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+            <button class="btn btn-sm btn-soft-danger ms-3" (click)="deleteAnnonce(ann.id)">
+              <i class="ri-delete-bin-line"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+  }
+}
+
+<!-- Fil public -->
+@if (activeTab === 'toutes') {
+  @for (ann of publicAnnonces; track ann.id) {
+    <div class="card border-0 shadow-sm mb-3">
+      <div class="card-body">
+        <div class="d-flex align-items-center gap-2 mb-3">
+          <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center flex-shrink-0"
+               style="width:38px;height:38px">
+            <i class="ri-store-2-line text-white fs-16"></i>
+          </div>
+          <div>
+            <div class="fw-semibold fs-14">{{ ann.author_name }}</div>
+            <div class="text-muted fs-12">{{ ann.shop_name || 'Vendeur' }} · {{ ann.created_at | date:'dd/MM/yyyy' }}</div>
+          </div>
+          @if (ann.type === 'deal') {
+            <span class="badge bg-warning-subtle text-warning ms-auto">
+              <i class="ri-price-tag-3-line me-1"></i>Deal
+            </span>
+          }
+        </div>
+        <h6 class="fw-bold">{{ ann.title }}</h6>
+        <p class="text-muted fs-13 mb-2">{{ ann.content }}</p>
+        @if (ann.image_url) {
+          <img [src]="ann.image_url" class="rounded-3 mb-3" style="max-height:280px;max-width:100%;object-fit:cover">
+        }
+        <div class="d-flex gap-3 pt-2 border-top">
+          <button class="btn btn-sm btn-soft-danger rounded-pill px-3" (click)="like(ann)">
+            <i class="ri-heart-line me-1"></i>{{ ann.likes_count }}
+          </button>
+          <button class="btn btn-sm btn-soft-secondary rounded-pill px-3" (click)="toggleComments(ann)">
+            <i class="ri-chat-3-line me-1"></i>{{ ann.comments_count }}
+          </button>
+        </div>
+        @if (expandedComments[ann.id]) {
+          <div class="mt-3 pt-3 border-top">
+            @for (c of (comments[ann.id] || []); track c.id) {
+              <div class="d-flex gap-2 mb-2">
+                <div class="rounded-circle bg-secondary-subtle d-flex align-items-center justify-content-center flex-shrink-0"
+                     style="width:28px;height:28px"><i class="ri-user-line text-muted fs-12"></i></div>
+                <div class="flex-fill bg-light rounded-3 px-3 py-2">
+                  <div class="fw-semibold fs-12">{{ c.author_name }}</div>
+                  <div class="fs-13">{{ c.content }}</div>
+                </div>
+              </div>
+            }
+            <div class="d-flex gap-2 mt-2">
+              <input type="text" class="form-control form-control-sm rounded-pill"
+                     placeholder="Commenter..." [(ngModel)]="commentText[ann.id]"
+                     (keyup.enter)="postComment(ann)">
+              <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="postComment(ann)">
+                <i class="ri-send-plane-line"></i>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+  @if (publicAnnonces.length === 0) {
+    <div class="text-center py-5">
+      <i class="ri-chat-3-line display-3 text-muted"></i>
+      <p class="text-muted mt-2">Aucune annonce publiée pour le moment.</p>
     </div>
   }
 }

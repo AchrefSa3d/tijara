@@ -1,7 +1,7 @@
 const COUNTRIES = [
     {
         taskId: "#VLZ632",
-        project: "TIJARA - v1.0.0",
+        project: "Velzon - v1.0.0",
         task: "Error message when placing an orders?",
         creater: "Robert McMahon",
         dueDate: "25 Jan, 2022",

@@ -1,5 +1,24 @@
-import { Component, OnInit, OnDestroy, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
-import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
+import { Component, OnInit, AfterViewChecked, ElementRef, ViewChild } from '@angular/core';
+
+interface Message {
+  id: number;
+  from: 'client' | 'vendor';
+  text: string;
+  time: string;
+  read: boolean;
+}
+
+interface Conversation {
+  id: number;
+  clientName: string;
+  clientEmail: string;
+  avatar: string;
+  lastMessage: string;
+  lastTime: string;
+  unread: number;
+  product: string;
+  messages: Message[];
+}
 
 @Component({
   selector: 'app-messages-ent',
@@ -7,7 +26,7 @@ import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
   styleUrls: ['./messages-ent.component.scss'],
   standalone: false
 })
-export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class MessagesEntComponent implements OnInit, AfterViewChecked {
 
   @ViewChild('msgContainer') msgContainer!: ElementRef;
 
@@ -16,97 +35,152 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
     { label: 'Messages', active: true }
   ];
 
-  conversations: any[] = [];
-  selectedConv: any    = null;
-  messages: any[]      = [];
-  newMessage           = '';
-  searchTerm           = '';
-  loading              = true;
-  sending              = false;
+  searchTerm = '';
+  newMessage = '';
+  selectedConv: Conversation | null = null;
   private shouldScroll = false;
-  private pollTimer: any;
-  currentUserId: number | null = null;
 
-  constructor(private api: TijaraApiService) {}
+  conversations: Conversation[] = [
+    {
+      id: 1,
+      clientName: 'Amine Touati',
+      clientEmail: 'user@tijara.tn',
+      avatar: 'AT',
+      product: 'Écouteurs Bluetooth Pro',
+      lastMessage: 'Bonjour, est-ce que cet article est encore disponible ?',
+      lastTime: '09:42',
+      unread: 2,
+      messages: [
+        { id: 1, from: 'client', text: 'Bonjour, est-ce que les écouteurs sont encore disponibles ?', time: '09:40', read: true },
+        { id: 2, from: 'client', text: 'Bonjour, est-ce que cet article est encore disponible ?', time: '09:42', read: false },
+      ]
+    },
+    {
+      id: 2,
+      clientName: 'Ghaith Slimi',
+      clientEmail: 'ghaith@gmail.com',
+      avatar: 'GS',
+      product: 'Smartphone 128GB',
+      lastMessage: 'Merci pour la livraison rapide !',
+      lastTime: 'Hier',
+      unread: 0,
+      messages: [
+        { id: 1, from: 'client', text: 'Bonjour, quel est le délai de livraison pour Sousse ?', time: '14:10', read: true },
+        { id: 2, from: 'vendor', text: 'Bonjour Ghaith ! La livraison à Sousse prend 24 à 48h.', time: '14:25', read: true },
+        { id: 3, from: 'client', text: 'Parfait, je passe commande maintenant.', time: '14:30', read: true },
+        { id: 4, from: 'vendor', text: 'Votre commande TJR-003 est confirmée. Bon shopping !', time: '14:32', read: true },
+        { id: 5, from: 'client', text: 'Merci pour la livraison rapide !', time: 'Hier', read: true },
+      ]
+    },
+    {
+      id: 3,
+      clientName: 'Inès Karray',
+      clientEmail: 'ines@gmail.com',
+      avatar: 'IK',
+      product: 'Montre Connectée Sport',
+      lastMessage: 'Avez-vous ce modèle en noir ?',
+      lastTime: 'Hier',
+      unread: 1,
+      messages: [
+        { id: 1, from: 'client', text: 'Avez-vous ce modèle en noir ?', time: 'Hier', read: false },
+      ]
+    },
+    {
+      id: 4,
+      clientName: 'Maroua Ben Salah',
+      clientEmail: 'maroua@gmail.com',
+      avatar: 'MB',
+      product: 'Smartphone 128GB',
+      lastMessage: 'Le produit est conforme à la description, bravo !',
+      lastTime: 'Lun',
+      unread: 0,
+      messages: [
+        { id: 1, from: 'client', text: 'Bonjour, c\'est possible de payer à la livraison ?', time: 'Lun 10:00', read: true },
+        { id: 2, from: 'vendor', text: 'Bonjour ! Oui, nous acceptons le paiement à la livraison partout en Tunisie.', time: 'Lun 10:15', read: true },
+        { id: 3, from: 'client', text: 'Super, je commande tout de suite.', time: 'Lun 10:18', read: true },
+        { id: 4, from: 'client', text: 'Le produit est conforme à la description, bravo !', time: 'Lun 16:30', read: true },
+      ]
+    },
+  ];
 
-  ngOnInit(): void {
-    const raw = localStorage.getItem('currentUser');
-    if (raw) { try { this.currentUserId = JSON.parse(raw).id; } catch {} }
-    this.loadConversations();
-    // Poll every 8 seconds for new messages
-    this.pollTimer = setInterval(() => this.pollMessages(), 8000);
+  get filteredConversations(): Conversation[] {
+    if (!this.searchTerm.trim()) return this.conversations;
+    const t = this.searchTerm.toLowerCase();
+    return this.conversations.filter(c =>
+      c.clientName.toLowerCase().includes(t) ||
+      c.product.toLowerCase().includes(t) ||
+      c.lastMessage.toLowerCase().includes(t)
+    );
   }
 
-  ngOnDestroy(): void {
-    if (this.pollTimer) clearInterval(this.pollTimer);
+  get totalUnread(): number {
+    return this.conversations.reduce((s, c) => s + c.unread, 0);
+  }
+
+  ngOnInit(): void {
+    this.selectedConv = this.conversations[1]; // ouvrir la 2ème conv par défaut
+    this.markRead(this.selectedConv);
+    this.loadFromStorage();
   }
 
   ngAfterViewChecked(): void {
-    if (this.shouldScroll) { this.scrollBottom(); this.shouldScroll = false; }
+    if (this.shouldScroll) {
+      this.scrollBottom();
+      this.shouldScroll = false;
+    }
   }
 
-  loadConversations(): void {
-    this.api.getConversations().subscribe({
-      next: (data: any[]) => {
-        this.conversations = data;
-        this.loading = false;
-        if (data.length > 0 && !this.selectedConv) {
-          this.selectConv(data[0]);
-        }
-      },
-      error: () => { this.loading = false; }
-    });
-  }
-
-  selectConv(conv: any): void {
+  selectConv(conv: Conversation): void {
     this.selectedConv = conv;
-    this.messages = [];
-    this.loadMessages(conv.id);
+    this.markRead(conv);
+    this.shouldScroll = true;
   }
 
-  loadMessages(convId: number): void {
-    this.api.getConversationMessages(convId).subscribe({
-      next: (res: any) => {
-        this.messages = res.messages || [];
-        this.shouldScroll = true;
-        // Update unread count in list
-        const c = this.conversations.find(c => c.id === convId);
-        if (c) c.unread_count = 0;
-      }
-    });
-  }
-
-  pollMessages(): void {
-    if (!this.selectedConv) return;
-    this.api.getConversationMessages(this.selectedConv.id).subscribe({
-      next: (res: any) => {
-        const newMsgs = res.messages || [];
-        if (newMsgs.length !== this.messages.length) {
-          this.messages = newMsgs;
-          this.shouldScroll = true;
-        }
-      }
-    });
+  markRead(conv: Conversation): void {
+    conv.messages.forEach(m => m.read = true);
+    conv.unread = 0;
   }
 
   sendMessage(): void {
     const text = this.newMessage.trim();
-    if (!text || !this.selectedConv || this.sending) return;
+    if (!text || !this.selectedConv) return;
 
-    this.sending = true;
-    this.api.sendMessage(this.selectedConv.id, text).subscribe({
-      next: (msg: any) => {
-        // Normalize: ensure is_mine = true since we just sent it
-        this.messages.push({ ...msg, is_mine: true });
-        this.newMessage    = '';
-        this.sending       = false;
-        this.shouldScroll  = true;
-        // Update last message preview
-        const c = this.conversations.find(c => c.id === this.selectedConv.id);
-        if (c) c.last_message = text;
-      },
-      error: () => { this.sending = false; }
+    const now = new Date();
+    const time = now.getHours() + ':' + now.getMinutes().toString().padStart(2, '0');
+
+    this.selectedConv.messages.push({
+      id: Date.now(),
+      from: 'vendor',
+      text,
+      time,
+      read: true
     });
+    this.selectedConv.lastMessage = text;
+    this.selectedConv.lastTime = time;
+    this.newMessage = '';
+    this.shouldScroll = true;
+    this.saveToStorage();
+
+    // Auto-réponse client
+    setTimeout(() => {
+      const replies = [
+        'Merci pour votre réponse rapide !',
+        'D\'accord, je vais passer commande.',
+        'Parfait, merci beaucoup !',
+        'Très bien, je vous recontacte si besoin.',
+      ];
+      const reply = replies[Math.floor(Math.random() * replies.length)];
+      this.selectedConv!.messages.push({
+        id: Date.now() + 1,
+        from: 'client',
+        text: reply,
+        time: new Date().getHours() + ':' + new Date().getMinutes().toString().padStart(2, '0'),
+        read: true
+      });
+      this.selectedConv!.lastMessage = reply;
+      this.shouldScroll = true;
+      this.saveToStorage();
+    }, 1500);
   }
 
   onEnter(event: KeyboardEvent): void {
@@ -116,52 +190,26 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
     }
   }
 
-  get filteredConversations(): any[] {
-    if (!this.searchTerm.trim()) return this.conversations;
-    const t = this.searchTerm.toLowerCase();
-    return this.conversations.filter(c =>
-      c.other_name?.toLowerCase().includes(t) ||
-      c.sender_name?.toLowerCase().includes(t) ||
-      c.receiver_name?.toLowerCase().includes(t) ||
-      c.product_name?.toLowerCase().includes(t) ||
-      c.last_message?.toLowerCase().includes(t)
-    );
-  }
-
-  get totalUnread(): number {
-    return this.conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
-  }
-
-  isMyMessage(msg: any): boolean {
-    // API returns is_mine directly; fallback to sender_id comparison
-    if (msg.is_mine !== undefined) return msg.is_mine;
-    return Number(msg.sender_id) === Number(this.currentUserId);
-  }
-
-  getInitials(name: string): string {
-    if (!name) return '?';
-    return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
-  }
-
-  getAvatarColor(idx: number): string {
-    const colors = ['#405189','#0ab39c','#f7b84b','#f06548','#299cdb'];
-    return colors[idx % colors.length];
-  }
-
-  getOtherName(conv: any): string {
-    // API returns other_name = the person who is NOT the current user
-    return conv.other_name || conv.sender_name || conv.receiver_name || 'Client';
-  }
-
-  getOtherEmail(conv: any): string {
-    // API does not return email in conversation list
-    return conv.other_email || '';
-  }
-
   private scrollBottom(): void {
     try {
       const el = this.msgContainer?.nativeElement;
       if (el) el.scrollTop = el.scrollHeight;
     } catch {}
+  }
+
+  private saveToStorage(): void {
+    sessionStorage.setItem('tijara_vendor_chats', JSON.stringify(this.conversations));
+  }
+
+  private loadFromStorage(): void {
+    const stored = sessionStorage.getItem('tijara_vendor_chats');
+    if (stored) {
+      try { this.conversations = JSON.parse(stored); } catch {}
+    }
+  }
+
+  getAvatarColor(idx: number): string {
+    const colors = ['#405189', '#0ab39c', '#f7b84b', '#f06548', '#299cdb'];
+    return colors[idx % colors.length];
   }
 }

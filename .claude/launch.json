@@ -6,7 +6,7 @@
       "runtimeExecutable": "npx",
       "runtimeArgs": ["ng", "serve", "--port", "4300", "--no-open"],
       "port": 4300,
-      "cwd": "."
+      "cwd": "C:\\Users\\MSI\\Downloads\\velzon19Ang\\velzon19Ang"
     }
   ]
 }

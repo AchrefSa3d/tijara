@@ -11,15 +11,6 @@ import { DashboardUserComponent }  from './dashboard/dashboard-user.component';
 import { OrdersUserComponent }     from './orders/orders-user.component';
 import { ProfileUserComponent }    from './profile/profile-user.component';
 import { AnnoncesUserComponent }   from './annonces/annonces-user.component';
-import { MessagesUserComponent }   from './messages/messages-user.component';
-import { WishlistUserComponent }   from './wishlist/wishlist-user.component';
-import { MyProductsUserComponent } from './my-products/my-products-user.component';
-import { MyReviewsUserComponent }  from './my-reviews/my-reviews-user.component';
-import { MyInvoicesUserComponent } from './my-invoices/my-invoices-user.component';
-import { MyDeliveriesUserComponent } from './my-deliveries/my-deliveries-user.component';
-import { PaymentUserComponent }    from './payment/payment-user.component';
-import { CouponsUserComponent }    from './coupons/coupons-user.component';
-import { PrizesUserComponent }     from './prizes/prizes-user.component';
 
 const routes: Routes = [
   { path: '',             redirectTo: 'dashboard', pathMatch: 'full' },
@@ -27,15 +18,6 @@ const routes: Routes = [
   { path: 'orders',      component: OrdersUserComponent },
   { path: 'profile',     component: ProfileUserComponent },
   { path: 'annonces',    component: AnnoncesUserComponent },
-  { path: 'messages',    component: MessagesUserComponent },
-  { path: 'wishlist',    component: WishlistUserComponent },
-  { path: 'my-products',   component: MyProductsUserComponent },
-  { path: 'my-reviews',    component: MyReviewsUserComponent },
-  { path: 'my-invoices',   component: MyInvoicesUserComponent },
-  { path: 'my-deliveries', component: MyDeliveriesUserComponent },
-  { path: 'payment',       component: PaymentUserComponent },
-  { path: 'coupons',       component: CouponsUserComponent },
-  { path: 'prizes',        component: PrizesUserComponent  },
   {
     path: 'reclamations',
     loadChildren: () =>
@@ -50,15 +32,6 @@ const routes: Routes = [
     OrdersUserComponent,
     ProfileUserComponent,
     AnnoncesUserComponent,
-    MessagesUserComponent,
-    WishlistUserComponent,
-    MyProductsUserComponent,
-    MyReviewsUserComponent,
-    MyInvoicesUserComponent,
-    MyDeliveriesUserComponent,
-    PaymentUserComponent,
-    CouponsUserComponent,
-    PrizesUserComponent,
   ],
   imports: [
     CommonModule,

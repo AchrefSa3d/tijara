@@ -67,11 +67,11 @@ export class ChatComponent implements OnInit {
   @ViewChild('messagesContainer') messagesContainer!: ElementRef;
 
   ngOnInit(): void {
-    const stored = localStorage.getItem('currentUser');
+    const stored = sessionStorage.getItem('currentUser');
     this.currentUser = stored ? JSON.parse(stored) : { firstName: 'Vous' };
 
     // Charger les messages sauvegardés
-    const savedChats = localStorage.getItem('tijara_chats');
+    const savedChats = sessionStorage.getItem('tijara_chats');
     if (savedChats) {
       const chats = JSON.parse(savedChats);
       this.vendors.forEach(v => {
@@ -125,7 +125,7 @@ export class ChatComponent implements OnInit {
   saveChats() {
     const chats: any = {};
     this.vendors.forEach(v => { chats[v.id] = v.messages; });
-    localStorage.setItem('tijara_chats', JSON.stringify(chats));
+    sessionStorage.setItem('tijara_chats', JSON.stringify(chats));
   }
 
   scrollBottom() {

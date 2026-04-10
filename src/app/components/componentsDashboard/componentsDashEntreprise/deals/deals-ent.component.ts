@@ -75,12 +75,10 @@ export class DealsEntComponent implements OnInit {
     this.submitError = '';
     const payload = { ...this.dealForm.value, image_url: this.imagePreview || null };
     this.api.createAnnonce(payload).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.submitting    = false;
         this.showForm      = false;
-        this.submitSuccess = res?.status === 'approved'
-          ? '✅ Deal publié avec succès ! Il est maintenant visible sur la boutique.'
-          : '⏳ Deal soumis ! En attente de validation par l\'administrateur.';
+        this.submitSuccess = 'Deal soumis ! En attente de validation admin.';
         this.imagePreview  = '';
         this.dealForm.reset({ type: 'deal' });
         this.loadMine();

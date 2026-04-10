@@ -1,7 +1,6 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Output, Inject, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EventService } from '../../core/services/event.service';
-import { TijaraApiService } from '../../core/services/tijara-api.service';
 
 //Logout
 import { environment } from '../../../environments/environment';
@@ -14,6 +13,7 @@ import { TokenStorageService } from '../../core/services/token-storage.service';
 import { CookieService } from 'ngx-cookie-service';
 import { LanguageService } from '../../core/services/language.service';
 import { TranslateService } from '@ngx-translate/core';
+import { allNotification, messages } from './data'
 import { CartModel } from './topbaruser.model';
 import { cartData } from './data';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -24,7 +24,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
     styleUrls: ['./topbaruser.component.scss'],
     standalone: false
 })
-export class TopbarUserComponent implements OnInit, OnDestroy {
+export class TopbarUserComponent implements OnInit {
   messages: any
   element: any;
   mode: string | undefined;
@@ -42,98 +42,18 @@ export class TopbarUserComponent implements OnInit, OnDestroy {
   newNotify: number = 0;
   readNotify: number = 0;
   isDropdownOpen = false;
-  unreadMessages = 0;
-  notifications: any[] = [];
-  unreadNotifications: number = 0;
-  private msgPollTimer: any;
   @ViewChild('removenotification') removenotification !: TemplateRef<any>;
   notifyId: any;
 
-  constructor(
-    @Inject(DOCUMENT) private document: any,
-    private eventService: EventService,
-    public languageService: LanguageService,
-    private modalService: NgbModal,
-    public _cookiesService: CookieService,
-    public translate: TranslateService,
-    private authService: AuthenticationService,
-    private authFackservice: AuthfakeauthenticationService,
-    private router: Router,
-    private TokenStorageService: TokenStorageService,
-    private api: TijaraApiService
-  ) { }
-
-  ngOnDestroy(): void {
-    if (this.msgPollTimer) clearInterval(this.msgPollTimer);
-  }
-
-  loadUnreadMessages(): void {
-    const raw = localStorage.getItem('currentUser');
-    if (!raw) return;
-    this.api.getConversations().subscribe({
-      next: (data: any[]) => {
-        this.unreadMessages = data.reduce((s: number, c: any) => s + (c.unread_count || 0), 0);
-      },
-      error: () => {}
-    });
-  }
-
-  loadNotifications(): void {
-    const raw = localStorage.getItem('currentUser');
-    if (!raw) return;
-    this.api.getNotifications().subscribe({
-      next: (res: any) => {
-        this.notifications       = res.notifications || [];
-        this.unreadNotifications = res.unread_count  || 0;
-      },
-      error: () => {}
-    });
-  }
-
-  loadCartCount(): void {
-    try {
-      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      const key = u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
-      const cart = JSON.parse(localStorage.getItem(key) || '[]');
-      this.cart_length = cart.reduce((sum: number, i: any) => sum + (i.qty || 1), 0);
-    } catch { this.cart_length = 0; }
-  }
-
-  get userInitials(): string {
-    const fn = (this.userData?.firstName || '')[0] || '';
-    const ln = (this.userData?.lastName  || '')[0] || '';
-    return (fn + ln).toUpperCase() || 'U';
-  }
-
-  get displayName(): string {
-    if (!this.userData) return 'Client';
-    return [this.userData.firstName, this.userData.lastName].filter(Boolean).join(' ')
-        || this.userData.username
-        || this.userData.email
-        || 'Client';
-  }
-
-  markAllRead(): void {
-    this.api.markAllNotificationsRead().subscribe({
-      next: () => {
-        this.notifications.forEach((n: any) => n.is_read = true);
-        this.unreadNotifications = 0;
-      }
-    });
-  }
+  constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
+    public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
+    private router: Router, private TokenStorageService: TokenStorageService) { }
 
   ngOnInit(): void {
     this.userData = this.TokenStorageService.getUser();
-    this.loadUnreadMessages();
-    this.loadNotifications();
-    this.loadCartCount();
-    this.msgPollTimer = setInterval(() => {
-      this.loadUnreadMessages();
-      this.loadNotifications();
-      this.loadCartCount();
-    }, 20000);
     this.element = document.documentElement;
 
+    // Cookies wise Language set
     this.cookieValue = this._cookiesService.get('lang');
     const val = this.listLang.filter(x => x.lang === this.cookieValue);
     this.countryName = val.map(element => element.text);
@@ -142,6 +62,17 @@ export class TopbarUserComponent implements OnInit, OnDestroy {
     } else {
       this.flagvalue = val.map(element => element.flag);
     }
+
+    // Fetch Data
+    this.allnotifications = allNotification;
+
+    this.messages = messages;
+    this.cartData = cartData;
+    this.cart_length = this.cartData.length;
+    this.cartData.forEach((item) => {
+      var item_price = item.quantity * item.price
+      this.total += item_price
+    });
   }
 
   /**
@@ -245,16 +176,8 @@ export class TopbarUserComponent implements OnInit, OnDestroy {
    * Logout the user
    */
   logout() {
-    try {
-      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
-      if (u?.id) localStorage.removeItem(`tijara_cart_${u.id}`);
-    } catch {}
-    localStorage.removeItem('currentUser');
-    localStorage.removeItem('token');
-    localStorage.removeItem('toast');
-    localStorage.removeItem('tijara_cart');
-    sessionStorage.clear();
-    window.location.href = '/auth/login';
+    this.authService.logout();
+    this.router.navigate(['/auth/login']);
   }
 
   windowScroll() {

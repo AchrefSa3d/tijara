@@ -191,8 +191,8 @@ const todoList = [
   const todoProject = [
     {
         id: "1",
-        title: "TIJARA Admin & Dashboard",
-        coll:"TIJARAAdmin",
+        title: "Velzon Admin & Dashboard",
+        coll:"velzonAdmin",
         subItem: [
             {
                 version: 'v1.4.0',

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 
+const TOKEN_KEY = 'auth-token';
 const USER_KEY = 'currentUser';
 
 @Injectable({
@@ -9,38 +10,29 @@ export class TokenStorageService {
   constructor() { }
 
   signOut(): void {
-    try {
-      const u = JSON.parse(localStorage.getItem(USER_KEY) || '{}');
-      if (u?.id) localStorage.removeItem(`tijara_cart_${u.id}`);
-    } catch {}
-    localStorage.removeItem(USER_KEY);
-    localStorage.removeItem('token');
-    localStorage.removeItem('toast');
-    localStorage.removeItem('tijara_cart');
-    sessionStorage.clear();
+    window.sessionStorage.clear();
   }
 
   public saveToken(token: string): void {
-    localStorage.setItem('token', token);
+    window.sessionStorage.removeItem(TOKEN_KEY);
+    window.sessionStorage.setItem(TOKEN_KEY, token);
   }
 
   public getToken(): string | null {
-    const raw = localStorage.getItem(USER_KEY);
-    if (raw) {
-      try { return JSON.parse(raw).token || null; } catch {}
-    }
-    return null;
+    return sessionStorage.getItem('token');
   }
 
   public saveUser(user: any): void {
-    localStorage.setItem(USER_KEY, JSON.stringify(user));
+    window.sessionStorage.removeItem(USER_KEY);
+    window.sessionStorage.setItem(USER_KEY, JSON.stringify(user));
   }
 
   public getUser(): any {
-    const raw = localStorage.getItem(USER_KEY);
-    if (raw) {
-      try { return JSON.parse(raw); } catch {}
+    const user = window.sessionStorage.getItem(USER_KEY);    
+    if (user) {
+      return JSON.parse(user);
     }
+
     return {};
   }
 }

@@ -13,7 +13,7 @@ export class AuthfakeauthenticationService {
     constructor(private http: HttpClient) {
         let storedUser: User | null = null;
         try {
-            const raw = localStorage.getItem('currentUser');
+            const raw = sessionStorage.getItem('currentUser');
             storedUser = raw ? JSON.parse(raw) : null;
         } catch { storedUser = null; }
         this.currentUserSubject = new BehaviorSubject<User>(storedUser as User);
@@ -37,8 +37,8 @@ export class AuthfakeauthenticationService {
             // login successful if there's a jwt token in the response
             if (user && user.token) {                    
                 // store user details and jwt token in local storage to keep user logged in between page refreshes
-                localStorage.setItem('toast', 'true');
-                localStorage.setItem('currentUser', JSON.stringify(user));
+                sessionStorage.setItem('toast', 'true');
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
                 this.currentUserSubject.next(user);
             }
             return user;
@@ -49,15 +49,8 @@ export class AuthfakeauthenticationService {
      * Logout the user
      */
     logout() {
-        try {
-          const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
-          if (u?.id) localStorage.removeItem(`tijara_cart_${u.id}`);
-        } catch {}
-        localStorage.removeItem('currentUser');
-        localStorage.removeItem('token');
-        localStorage.removeItem('toast');
-        localStorage.removeItem('tijara_cart');
-        sessionStorage.clear();
+        // remove user from local storage to log user out
+        sessionStorage.removeItem('currentUser');
         this.currentUserSubject.next(null!);
     }
 }

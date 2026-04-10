@@ -75,12 +75,10 @@ export class AnnoncesEntComponent implements OnInit {
     this.submitError = '';
     const payload = { ...this.annonceForm.value, image_url: this.imagePreview || null };
     this.api.createAnnonce(payload).subscribe({
-      next: (res: any) => {
+      next: () => {
         this.submitting    = false;
         this.showForm      = false;
-        this.submitSuccess = res?.status === 'approved'
-          ? '✅ Annonce publiée avec succès ! Elle est maintenant visible.'
-          : '⏳ Annonce soumise ! En attente de validation par l\'administrateur.';
+        this.submitSuccess = 'Soumis avec succès ! En attente de validation admin.';
         this.imagePreview  = '';
         this.annonceForm.reset();
         this.loadMine();
@@ -135,10 +133,6 @@ export class AnnoncesEntComponent implements OnInit {
       case 'rejected': return 'bg-danger-subtle text-danger';
       default:         return 'bg-secondary-subtle text-secondary';
     }
-  }
-
-  countByStatus(status: string): number {
-    return this.myAnnonces.filter(a => a.status === status).length;
   }
 
   getStatusLabel(s: string): string {

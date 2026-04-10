@@ -19,35 +19,6 @@
                 </div>
             </div>
 
-            <!-- Message email de confirmation envoyé -->
-            @if (emailSent) {
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6 col-xl-5">
-                    <div class="card mt-4 border-0 shadow-lg" style="border-radius:20px;overflow:hidden">
-                        <div style="background:linear-gradient(135deg,#405189,#0ab39c);padding:40px 32px;text-align:center">
-                            <div style="width:72px;height:72px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px">
-                                <i class="ri-mail-check-line text-white" style="font-size:36px"></i>
-                            </div>
-                            <h4 class="text-white fw-bold mb-1">Vérifiez votre boîte mail !</h4>
-                            <p class="mb-0" style="color:rgba(255,255,255,0.8);font-size:14px">Un email de confirmation a été envoyé</p>
-                        </div>
-                        <div class="card-body p-4 text-center">
-                            <p class="text-muted fs-14 mb-1">Nous avons envoyé un lien de confirmation à :</p>
-                            <div class="fw-bold fs-16 text-primary mb-4">{{ registeredEmail }}</div>
-                            <div class="alert alert-info text-start fs-13 border-0" style="background:#e8f4fd;border-radius:12px">
-                                <i class="ri-information-line me-2 text-info"></i>
-                                Cliquez sur le lien dans l'email pour activer votre compte. Vérifiez aussi vos <strong>spams</strong>.
-                            </div>
-                            <p class="text-muted fs-12 mt-3 mb-4">Le lien expire dans <strong>24 heures</strong>.</p>
-                            <a routerLink="/auth/login" class="btn btn-primary w-100 rounded-pill fw-semibold py-2">
-                                <i class="ri-arrow-left-line me-1"></i> Aller à la connexion
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            }
-
             <!-- Message attente approbation vendor -->
             @if (pendingApproval) {
             <div class="row justify-content-center">
@@ -75,7 +46,7 @@
             </div>
             }
 
-            @if (!pendingApproval && !emailSent) {
+            @if (!pendingApproval) {
             <div class="row justify-content-center">
                 <div class="col-md-9 col-lg-7 col-xl-6">
                     <div class="card mt-4">
@@ -86,42 +57,10 @@
                             </div>
 
                             @if (error) {
-                            <div class="alert alert-danger border-0 rounded-3">
+                            <div class="alert alert-danger">
                                 <i class="ri-error-warning-line me-2"></i>{{ error }}
                             </div>
                             }
-
-                            <!-- Connexion sociale (clients uniquement) -->
-                            <div class="mb-3">
-                                <p class="text-muted fs-12 text-center mb-2">Inscription rapide pour les clients</p>
-                                <div id="google-btn-register" class="d-flex justify-content-center mb-2"></div>
-                                @if (googleLoading) {
-                                    <div class="d-flex align-items-center justify-content-center gap-2 text-muted fs-13 mt-1 mb-2">
-                                        <span class="spinner-border spinner-border-sm"></span>
-                                        Connexion en cours...
-                                    </div>
-                                }
-                                <!-- Facebook -->
-                                <button type="button"
-                                        class="btn w-100 fw-semibold py-2 d-flex align-items-center justify-content-center gap-2"
-                                        style="background:#1877f2;color:white;border:none;border-radius:8px"
-                                        (click)="facebookLogin()"
-                                        [disabled]="facebookLoading">
-                                    @if(facebookLoading){
-                                        <span class="spinner-border spinner-border-sm"></span>
-                                    } @else {
-                                        <i class="ri-facebook-fill fs-18"></i>
-                                    }
-                                    Continuer avec Facebook
-                                </button>
-                            </div>
-
-                            <!-- Séparateur -->
-                            <div class="d-flex align-items-center gap-3 mb-4">
-                                <hr class="flex-fill m-0">
-                                <span class="text-muted fs-12 fw-medium px-1">OU inscription manuelle</span>
-                                <hr class="flex-fill m-0">
-                            </div>
 
                             <!-- Sélection type de compte -->
                             <div class="mb-4">
@@ -190,30 +129,6 @@
                                             <input type="text" class="form-control" placeholder="Tunis, Sfax..."
                                                 formControlName="city">
                                         </div>
-
-                                        <!-- Date de naissance et Genre (client uniquement) -->
-                                        @if (f['role'].value === 'user') {
-                                        <div class="col-6">
-                                            <label class="form-label">
-                                                <i class="ri-cake-line me-1 text-muted"></i>Date de naissance
-                                            </label>
-                                            <input type="date" class="form-control"
-                                                formControlName="birthDate"
-                                                [max]="year - 18 + '-12-31'">
-                                        </div>
-                                        <div class="col-6">
-                                            <label class="form-label">
-                                                <i class="ri-user-line me-1 text-muted"></i>Genre
-                                            </label>
-                                            <select class="form-select" formControlName="gender">
-                                                <option value="">— Sélectionner —</option>
-                                                <option value="homme">Homme</option>
-                                                <option value="femme">Femme</option>
-                                                <option value="autre">Préfère ne pas préciser</option>
-                                            </select>
-                                        </div>
-                                        }
-
                                     </div>
                                 </div>
 
