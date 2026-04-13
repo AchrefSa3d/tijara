@@ -8,8 +8,8 @@ import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 })
 export class ProfileUserComponent implements OnInit {
 
+  activeTab: 'info' | 'security' | 'prefs' = 'info';
   editMode    = false;
-  passwordMode = false;
   saveSuccess = false;
   pwdSuccess  = false;
   pwdError    = '';
@@ -21,17 +21,17 @@ export class ProfileUserComponent implements OnInit {
   ];
 
   profile = {
-    firstName:    '',
-    lastName:     '',
-    email:        '',
-    phone:        '',
-    address:      '',
-    city:         '',
-    postalCode:   '',
-    country:      'Tunisie',
-    birthDate:    '',
-    gender:       '',
-    newsletter:   true,
+    firstName:     '',
+    lastName:      '',
+    email:         '',
+    phone:         '',
+    address:       '',
+    city:          '',
+    postalCode:    '',
+    country:       'Tunisie',
+    birthDate:     '',
+    gender:        '',
+    newsletter:    true,
     notifications: true,
   };
 
@@ -40,17 +40,11 @@ export class ProfileUserComponent implements OnInit {
   showCurrent = false;
   showNew     = false;
 
-  stats = [
-    { label: 'Commandes',         value: '0',  icon: 'ri-shopping-bag-3-line',     color: 'primary' },
-    { label: 'Commandes livrées', value: '0',  icon: 'ri-check-double-line',        color: 'success' },
-    { label: 'Points fidélité',   value: '0',  icon: 'ri-medal-line',               color: 'warning' },
-    { label: 'Réclamations',      value: '0',  icon: 'ri-customer-service-2-line',  color: 'danger'  },
-  ];
+  ordersStats = { total: 0, delivered: 0, pending: 0, totalSpent: 0 };
 
   constructor(private api: TijaraApiService) {}
 
   ngOnInit(): void {
-    // Charger depuis sessionStorage d'abord (rapide)
     try {
       const raw = sessionStorage.getItem('currentUser');
       if (raw) {
@@ -65,7 +59,6 @@ export class ProfileUserComponent implements OnInit {
       }
     } catch {}
 
-    // Charger depuis le vrai backend (fraîches)
     this.api.getMe().subscribe({
       next: (user: any) => {
         this.profile.firstName = user.first_name || user.firstName || '';
@@ -78,12 +71,26 @@ export class ProfileUserComponent implements OnInit {
       },
       error: () => { this.loading = false; }
     });
+
+    this.api.getOrders().subscribe({
+      next: (orders: any[]) => {
+        this.ordersStats.total     = orders.length;
+        this.ordersStats.delivered = orders.filter((o: any) => o.status === 'delivered').length;
+        this.ordersStats.pending   = orders.filter((o: any) => o.status === 'pending').length;
+        this.ordersStats.totalSpent = orders.reduce((s: number, o: any) => s + (+o.total_amount || 0), 0);
+      },
+      error: () => {}
+    });
   }
 
   get initials(): string {
     const f = this.profile.firstName?.[0] || '?';
     const l = this.profile.lastName?.[0]  || '';
     return `${f}${l}`.toUpperCase();
+  }
+
+  get fullName(): string {
+    return `${this.profile.firstName} ${this.profile.lastName}`.trim() || 'Client';
   }
 
   startEdit(): void {
@@ -95,7 +102,7 @@ export class ProfileUserComponent implements OnInit {
   cancelEdit(): void { this.editMode = false; }
 
   saveProfile(): void {
-    this.profile = { ...this.editData };
+    this.profile  = { ...this.editData };
     this.editMode = false;
     this.saveSuccess = true;
     setTimeout(() => (this.saveSuccess = false), 3500);
@@ -112,9 +119,8 @@ export class ProfileUserComponent implements OnInit {
     if (this.passwords.newPwd !== this.passwords.confirm) {
       this.pwdError = 'Les mots de passe ne correspondent pas.'; return;
     }
-    this.pwdSuccess  = true;
-    this.passwordMode = false;
-    this.passwords   = { current: '', newPwd: '', confirm: '' };
+    this.pwdSuccess   = true;
+    this.passwords    = { current: '', newPwd: '', confirm: '' };
     setTimeout(() => (this.pwdSuccess = false), 3500);
   }
 }

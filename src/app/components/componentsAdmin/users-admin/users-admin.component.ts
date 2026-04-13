@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 @Component({
@@ -21,7 +22,15 @@ export class UsersAdminComponent implements OnInit {
   allUsers: any[]      = [];
   filteredUsers: any[] = [];
 
-  constructor(private api: TijaraApiService) {}
+  constructor(private api: TijaraApiService, private router: Router) {}
+
+  viewProfile(user: any): void {
+    if (user.role === 'vendor') {
+      this.router.navigate(['/admin/vendor-detail', user.id]);
+    } else {
+      this.router.navigate(['/admin/user-detail', user.id]);
+    }
+  }
 
   ngOnInit(): void { this.loadUsers(); }
 

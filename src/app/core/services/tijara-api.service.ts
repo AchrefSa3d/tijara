@@ -27,6 +27,10 @@ export class TijaraApiService {
     return this.http.post(`${this.apiUrl}/auth/login`, { email, password });
   }
 
+  googleLogin(credential: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/auth/google`, { credential });
+  }
+
   register(data: any): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/register`, data);
   }
@@ -124,6 +128,41 @@ export class TijaraApiService {
     return this.http.post(`${this.apiUrl}/annonces/${id}/comments`, { content }, { headers: this.getHeaders() });
   }
 
+  // ─── Vendor profile (public) ────────────────────────────
+  getVendorProfile(vendorId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/products/vendor/${vendorId}`);
+  }
+
+  // ─── Reviews ────────────────────────────────────────────
+  getProductReviews(productId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/products/${productId}/reviews`);
+  }
+
+  addReview(productId: number, data: { rating: number; comment?: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/products/${productId}/reviews`, data, { headers: this.getHeaders() });
+  }
+
+  deleteReview(productId: number, reviewId: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/products/${productId}/reviews/${reviewId}`, { headers: this.getHeaders() });
+  }
+
+  // ─── Messages ───────────────────────────────────────────
+  getConversations(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/messages/conversations`, { headers: this.getHeaders() });
+  }
+
+  getConversationMessages(convId: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/messages/conversations/${convId}`, { headers: this.getHeaders() });
+  }
+
+  sendMessage(convId: number, content: string): Observable<any> {
+    return this.http.post(`${this.apiUrl}/messages/conversations/${convId}`, { content }, { headers: this.getHeaders() });
+  }
+
+  startConversation(data: { vendor_id: number; product_id?: number; product_name?: string; content: string }): Observable<any> {
+    return this.http.post(`${this.apiUrl}/messages/start`, data, { headers: this.getHeaders() });
+  }
+
   // ─── Admin modération ────────────────────────────────────
   getAdminAnnonces(status?: string): Observable<any> {
     const options: any = { headers: this.getHeaders() };
@@ -167,6 +206,15 @@ export class TijaraApiService {
     const options: any = { headers: this.getHeaders() };
     if (approvalStatus) options.params = { approval_status: approvalStatus };
     return this.http.get(`${this.apiUrl}/admin/all-products`, options);
+  }
+
+  // ─── Admin profiles ──────────────────────────────────────
+  getAdminVendorDetails(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/admin/vendors/${id}`, { headers: this.getHeaders() });
+  }
+
+  getAdminUserDetails(id: number): Observable<any> {
+    return this.http.get(`${this.apiUrl}/admin/users/${id}`, { headers: this.getHeaders() });
   }
 
   // ─── Admin ──────────────────────────────────────────────

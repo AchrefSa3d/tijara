@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CartItem } from '../cart/cart.component';
+import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 @Component({
   selector: 'app-checkout',
@@ -19,9 +20,11 @@ export class CheckoutComponent implements OnInit {
 
   checkoutForm!: FormGroup;
   cartItems: CartItem[] = [];
-  submitted = false;
-  orderPlaced = false;
-  orderNumber = '';
+  submitted    = false;
+  loading      = false;
+  orderPlaced  = false;
+  orderNumber  = '';
+  errorMsg     = '';
   paymentMethod = 'livraison';
 
   villes = [
@@ -31,7 +34,11 @@ export class CheckoutComponent implements OnInit {
     'Médenine', 'Tataouine', 'Gafsa', 'Tozeur', 'Kébili', 'La Marsa'
   ];
 
-  constructor(private fb: FormBuilder, private router: Router) {}
+  constructor(
+    private fb: FormBuilder,
+    private router: Router,
+    private api: TijaraApiService
+  ) {}
 
   ngOnInit(): void {
     const saved = sessionStorage.getItem('tijara_cart');
@@ -40,6 +47,7 @@ export class CheckoutComponent implements OnInit {
       this.router.navigate(['/shop/cart']);
       return;
     }
+
     const user = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
     this.checkoutForm = this.fb.group({
       firstName: [user.firstName || '', [Validators.required, Validators.minLength(2)]],
@@ -63,28 +71,44 @@ export class CheckoutComponent implements OnInit {
 
   placeOrder() {
     this.submitted = true;
+    this.errorMsg  = '';
     if (this.checkoutForm.invalid) return;
 
-    this.orderNumber = 'TJR-' + Date.now().toString().slice(-6);
+    // Vérifier que l'utilisateur est connecté
+    const currentUser = JSON.parse(sessionStorage.getItem('currentUser') || '{}');
+    if (!currentUser?.token) {
+      this.errorMsg = 'Vous devez être connecté pour passer une commande.';
+      return;
+    }
 
-    const order = {
-      orderNumber: this.orderNumber,
-      date: new Date().toLocaleDateString('fr-FR'),
-      items: this.cartItems,
-      total: this.total,
-      address: this.checkoutForm.value,
-      payment: this.paymentMethod,
-      status: 'En attente'
+    const v = this.checkoutForm.value;
+    const shippingAddress = `${v.firstName} ${v.lastName}, ${v.address}, ${v.ville} — Tél: ${v.phone}`;
+
+    const orderPayload = {
+      items: this.cartItems.map((i: CartItem) => ({
+        product_id: i.product.id,
+        quantity:   i.qty
+      })),
+      shipping_address: shippingAddress,
+      notes: v.notes || null
     };
-    const orders = JSON.parse(sessionStorage.getItem('tijara_orders') || '[]');
-    orders.unshift(order);
-    sessionStorage.setItem('tijara_orders', JSON.stringify(orders));
 
-    sessionStorage.removeItem('tijara_cart');
-    this.cartItems = [];
-    this.orderPlaced = true;
+    this.loading = true;
+    this.api.createOrder(orderPayload).subscribe({
+      next: (res: any) => {
+        this.loading    = false;
+        this.orderNumber = `TJR-${String(res.id).padStart(6, '0')}`;
+        sessionStorage.removeItem('tijara_cart');
+        this.cartItems  = [];
+        this.orderPlaced = true;
+      },
+      error: (err: any) => {
+        this.loading  = false;
+        this.errorMsg = err?.error?.message || 'Erreur lors de la commande. Veuillez réessayer.';
+      }
+    });
   }
 
-  goShop() { this.router.navigate(['/shop/products']); }
-  goOrders() { this.router.navigate(['/shop/orders']); }
+  goShop()   { this.router.navigate(['/shop/products']); }
+  goOrders() { this.router.navigate(['/users/orders']); }
 }

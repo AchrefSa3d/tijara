@@ -2,18 +2,18 @@ import { Component, OnInit, OnDestroy, AfterViewChecked, ElementRef, ViewChild }
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 @Component({
-  selector: 'app-messages-ent',
-  templateUrl: './messages-ent.component.html',
-  styleUrls: ['./messages-ent.component.scss'],
+  selector: 'app-messages-user',
+  templateUrl: './messages-user.component.html',
+  styleUrls: ['./messages-user.component.scss'],
   standalone: false
 })
-export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked {
+export class MessagesUserComponent implements OnInit, OnDestroy, AfterViewChecked {
 
   @ViewChild('msgContainer') msgContainer!: ElementRef;
 
   breadCrumbItems = [
-    { label: 'Vendeur' },
-    { label: 'Messages', active: true }
+    { label: 'Mon Espace' },
+    { label: 'Mes Messages', active: true }
   ];
 
   conversations: any[] = [];
@@ -33,7 +33,6 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
     const raw = sessionStorage.getItem('currentUser');
     if (raw) { try { this.currentUserId = JSON.parse(raw).id; } catch {} }
     this.loadConversations();
-    // Poll every 8 seconds for new messages
     this.pollTimer = setInterval(() => this.pollMessages(), 8000);
   }
 
@@ -69,7 +68,6 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
       next: (res: any) => {
         this.messages = res.messages || [];
         this.shouldScroll = true;
-        // Update unread count in list
         const c = this.conversations.find(c => c.id === convId);
         if (c) c.unread_count = 0;
       }
@@ -92,15 +90,13 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
   sendMessage(): void {
     const text = this.newMessage.trim();
     if (!text || !this.selectedConv || this.sending) return;
-
     this.sending = true;
     this.api.sendMessage(this.selectedConv.id, text).subscribe({
       next: (msg: any) => {
         this.messages.push(msg);
-        this.newMessage    = '';
-        this.sending       = false;
-        this.shouldScroll  = true;
-        // Update last message preview
+        this.newMessage   = '';
+        this.sending      = false;
+        this.shouldScroll = true;
         const c = this.conversations.find(c => c.id === this.selectedConv.id);
         if (c) c.last_message = text;
       },
@@ -119,7 +115,6 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
     if (!this.searchTerm.trim()) return this.conversations;
     const t = this.searchTerm.toLowerCase();
     return this.conversations.filter(c =>
-      c.client_name?.toLowerCase().includes(t) ||
       c.vendor_name?.toLowerCase().includes(t) ||
       c.product_name?.toLowerCase().includes(t) ||
       c.last_message?.toLowerCase().includes(t)
@@ -134,23 +129,18 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
     return msg.sender_id === this.currentUserId;
   }
 
+  getOtherName(conv: any): string {
+    return conv.vendor_name || conv.vendor_email || 'Vendeur';
+  }
+
   getInitials(name: string): string {
     if (!name) return '?';
-    return name.split(' ').map(w => w[0]).join('').substring(0, 2).toUpperCase();
+    return name.split(' ').map((w: string) => w[0]).join('').substring(0, 2).toUpperCase();
   }
 
   getAvatarColor(idx: number): string {
     const colors = ['#405189','#0ab39c','#f7b84b','#f06548','#299cdb'];
     return colors[idx % colors.length];
-  }
-
-  getOtherName(conv: any): string {
-    // For vendor: show client name; for client: show vendor name
-    return conv.client_name || conv.vendor_name || 'Client';
-  }
-
-  getOtherEmail(conv: any): string {
-    return conv.client_email || conv.vendor_email || '';
   }
 
   private scrollBottom(): void {

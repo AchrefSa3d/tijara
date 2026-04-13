@@ -5,7 +5,7 @@ const projectListWidgets = [
     time: "Updated 3hrs ago",
     img: 'assets/images/brands/slack.png',
     label: 'Slack brand logo design',
-    caption: 'Create a Brand logo design for a velzon admin.',
+    caption: 'Create a Brand logo design for a TIJARA admin.',
     number: '18/42',
     progressBar: 34,
     date: '10 Jul, 2021',

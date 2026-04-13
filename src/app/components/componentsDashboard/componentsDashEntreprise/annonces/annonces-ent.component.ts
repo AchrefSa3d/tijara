@@ -135,6 +135,10 @@ export class AnnoncesEntComponent implements OnInit {
     }
   }
 
+  countByStatus(status: string): number {
+    return this.myAnnonces.filter(a => a.status === status).length;
+  }
+
   getStatusLabel(s: string): string {
     switch (s) {
       case 'approved': return 'Approuvée';

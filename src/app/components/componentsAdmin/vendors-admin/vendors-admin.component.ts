@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 @Component({
@@ -21,7 +22,11 @@ export class VendorsAdminComponent implements OnInit {
   allVendors: any[]      = [];
   filteredVendors: any[] = [];
 
-  constructor(private api: TijaraApiService) {}
+  constructor(private api: TijaraApiService, private router: Router) {}
+
+  viewProfile(vendor: any): void {
+    this.router.navigate(['/admin/vendor-detail', vendor.id]);
+  }
 
   ngOnInit(): void { this.loadVendors(); }
 
@@ -30,16 +35,21 @@ export class VendorsAdminComponent implements OnInit {
     this.api.getAllVendors().subscribe({
       next: (data: any[]) => {
         this.allVendors = data.map(v => ({
-          id:     v.id,
-          owner:  `${v.first_name || ''} ${v.last_name || ''}`.trim(),
-          email:  v.email,
-          phone:  v.phone || '-',
-          ville:  v.city  || '-',
-          status: !v.is_active  ? 'suspendu'
-                : !v.is_approved ? 'en attente'
-                : 'actif',
-          joined: new Date(v.created_at).toLocaleDateString('fr-FR'),
-          avatar: `${v.first_name?.[0] || ''}${v.last_name?.[0] || ''}`.toUpperCase(),
+          id:       v.id,
+          shop:     v.shop_name || `${v.first_name || ''} ${v.last_name || ''}`.trim(),
+          owner:    `${v.first_name || ''} ${v.last_name || ''}`.trim(),
+          email:    v.email,
+          phone:    v.phone || '-',
+          ville:    v.city  || '-',
+          company:  v.company_number || '-',
+          products: v.product_count || 0,
+          orders:   v.order_count   || 0,
+          revenue:  v.revenue       || 0,
+          status:   !v.is_active   ? 'suspendu'
+                  : !v.is_approved  ? 'en attente'
+                  : 'actif',
+          joined:   new Date(v.created_at).toLocaleDateString('fr-FR'),
+          avatar:   `${v.first_name?.[0] || ''}${v.last_name?.[0] || ''}`.toUpperCase(),
         }));
         this.loading = false;
         this.applyFilter();
@@ -63,11 +73,19 @@ export class VendorsAdminComponent implements OnInit {
     this.filteredVendors = list;
   }
 
+  approveMsg = '';
+  rejectMsg  = '';
+
   approve(vendor: any): void {
     this.api.approveVendor(vendor.id).subscribe({
       next: () => {
-        vendor.status = 'actif';
+        vendor.status  = 'actif';
+        this.approveMsg = `✓ ${vendor.shop} approuvé avec succès.`;
+        setTimeout(() => this.approveMsg = '', 4000);
         this.applyFilter();
+      },
+      error: (err: any) => {
+        alert('Erreur lors de l\'approbation : ' + (err?.error?.message || err.status));
       }
     });
   }
@@ -78,6 +96,9 @@ export class VendorsAdminComponent implements OnInit {
       next: () => {
         this.allVendors = this.allVendors.filter(v => v.id !== vendor.id);
         this.applyFilter();
+      },
+      error: (err: any) => {
+        alert('Erreur lors du rejet : ' + (err?.error?.message || err.status));
       }
     });
   }

@@ -1,6 +1,7 @@
-import { Component, OnInit, EventEmitter, Output, Inject, ViewChild, TemplateRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, EventEmitter, Output, Inject, ViewChild, TemplateRef } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { EventService } from '../../core/services/event.service';
+import { TijaraApiService } from '../../core/services/tijara-api.service';
 
 //Logout
 import { environment } from '../../../environments/environment';
@@ -24,7 +25,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
     styleUrls: ['./topbaruser.component.scss'],
     standalone: false
 })
-export class TopbarUserComponent implements OnInit {
+export class TopbarUserComponent implements OnInit, OnDestroy {
   messages: any
   element: any;
   mode: string | undefined;
@@ -42,15 +43,44 @@ export class TopbarUserComponent implements OnInit {
   newNotify: number = 0;
   readNotify: number = 0;
   isDropdownOpen = false;
+  unreadMessages = 0;
+  private msgPollTimer: any;
   @ViewChild('removenotification') removenotification !: TemplateRef<any>;
   notifyId: any;
 
-  constructor(@Inject(DOCUMENT) private document: any, private eventService: EventService, public languageService: LanguageService, private modalService: NgbModal,
-    public _cookiesService: CookieService, public translate: TranslateService, private authService: AuthenticationService, private authFackservice: AuthfakeauthenticationService,
-    private router: Router, private TokenStorageService: TokenStorageService) { }
+  constructor(
+    @Inject(DOCUMENT) private document: any,
+    private eventService: EventService,
+    public languageService: LanguageService,
+    private modalService: NgbModal,
+    public _cookiesService: CookieService,
+    public translate: TranslateService,
+    private authService: AuthenticationService,
+    private authFackservice: AuthfakeauthenticationService,
+    private router: Router,
+    private TokenStorageService: TokenStorageService,
+    private api: TijaraApiService
+  ) { }
+
+  ngOnDestroy(): void {
+    if (this.msgPollTimer) clearInterval(this.msgPollTimer);
+  }
+
+  loadUnreadMessages(): void {
+    const raw = sessionStorage.getItem('currentUser');
+    if (!raw) return;
+    this.api.getConversations().subscribe({
+      next: (data: any[]) => {
+        this.unreadMessages = data.reduce((s: number, c: any) => s + (c.unread_count || 0), 0);
+      },
+      error: () => {}
+    });
+  }
 
   ngOnInit(): void {
     this.userData = this.TokenStorageService.getUser();
+    this.loadUnreadMessages();
+    this.msgPollTimer = setInterval(() => this.loadUnreadMessages(), 15000);
     this.element = document.documentElement;
 
     // Cookies wise Language set

@@ -3,10 +3,10 @@ const marketplaceData = [
       id: '1',
       images: [
         {
-          image: [{ img: 'assets/images/nft/img-05.jpg' }, { img: 'https://img.themesbrand.com/velzon/images/img-1.gif' }]
+          image: [{ img: 'assets/images/nft/img-05.jpg' }, { img: 'https://img.themesbrand.com/TIJARA/images/img-1.gif' }]
         },
         {
-          image: [{ img: 'https://img.themesbrand.com/velzon/images/img-4.gif' }, { img: 'assets/images/nft/img-04.jpg' }]
+          image: [{ img: 'https://img.themesbrand.com/TIJARA/images/img-4.gif' }, { img: 'assets/images/nft/img-04.jpg' }]
         },
       ],
     },
@@ -14,10 +14,10 @@ const marketplaceData = [
       id: '2',
       images: [
         {
-          image: [{ img: 'assets/images/nft/img-06.jpg' }, { img: 'https://img.themesbrand.com/velzon/images/img-2.gif' }]
+          image: [{ img: 'assets/images/nft/img-06.jpg' }, { img: 'https://img.themesbrand.com/TIJARA/images/img-2.gif' }]
         },
         {
-          image: [{ img: 'https://img.themesbrand.com/velzon/images/img-5.gif' }, { img: 'assets/images/nft/img-03.jpg' }]
+          image: [{ img: 'https://img.themesbrand.com/TIJARA/images/img-5.gif' }, { img: 'assets/images/nft/img-03.jpg' }]
         },
       ],
     },
@@ -25,10 +25,10 @@ const marketplaceData = [
       id: '3',
       images: [
         {
-          image: [{ img: 'assets/images/nft/img-02.jpg' }, { img: 'https://img.themesbrand.com/velzon/images/img-3.gif' }]
+          image: [{ img: 'assets/images/nft/img-02.jpg' }, { img: 'https://img.themesbrand.com/TIJARA/images/img-3.gif' }]
         },
         {
-          image: [{ img: 'https://img.themesbrand.com/velzon/images/img-1.gif' }, { img: 'assets/images/nft/img-01.jpg' }]
+          image: [{ img: 'https://img.themesbrand.com/TIJARA/images/img-1.gif' }, { img: 'assets/images/nft/img-01.jpg' }]
         },
       ],
     }
@@ -65,7 +65,7 @@ const marketplaceData = [
       img: 'assets/images/users/avatar-10.jpg',
       author: "Diana Kohler",
       title: "Owners",
-      cardImg: 'https://img.themesbrand.com/velzon/images/img-1.gif',
+      cardImg: 'https://img.themesbrand.com/TIJARA/images/img-1.gif',
       likes: "8.34k",
       price: "701.38 ETH",
       category: "Long-tailed Macaque",
@@ -110,7 +110,7 @@ const marketplaceData = [
     },
     {
       id: 2,
-      img: 'https://img.themesbrand.com/velzon/images/img-2.gif',
+      img: 'https://img.themesbrand.com/TIJARA/images/img-2.gif',
       likes: "94.1k",
       title: "Trendy Fashion Portraits",
       category: "3d Style",
@@ -128,7 +128,7 @@ const marketplaceData = [
     },
     {
       id: 4,
-      img: 'https://img.themesbrand.com/velzon/images/img-4.gif',
+      img: 'https://img.themesbrand.com/TIJARA/images/img-4.gif',
       likes: "15.93k",
       title: "Evolved Reality",
       category: "Video",
@@ -160,7 +160,7 @@ const marketplaceData = [
     },
     {
       id: 2,
-      cardImg: 'https://img.themesbrand.com/velzon/images/img-5.gif',
+      cardImg: 'https://img.themesbrand.com/TIJARA/images/img-5.gif',
       img: 'assets/images/nft/img-04.jpg',
       author: "Kevin Dawson",
       products: 649,
@@ -175,7 +175,7 @@ const marketplaceData = [
     {
       id: 4,
       cardImg: 'assets/images/nft/img-05.jpg',
-      img: 'https://img.themesbrand.com/velzon/images/img-2.gif',
+      img: 'https://img.themesbrand.com/TIJARA/images/img-2.gif',
       author: "Thomas Taylor",
       products: 345,
       isFollow: true,
@@ -183,7 +183,7 @@ const marketplaceData = [
     {
       id: 2,
       cardImg: 'assets/images/nft/img-02.jpg',
-      img: 'https://img.themesbrand.com/velzon/images/img-1.gif',
+      img: 'https://img.themesbrand.com/TIJARA/images/img-1.gif',
       author: "James Price",
       products: 745,
       isFollow: true,

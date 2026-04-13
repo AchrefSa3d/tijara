@@ -57,10 +57,29 @@
                             </div>
 
                             @if (error) {
-                            <div class="alert alert-danger">
+                            <div class="alert alert-danger border-0 rounded-3">
                                 <i class="ri-error-warning-line me-2"></i>{{ error }}
                             </div>
                             }
+
+                            <!-- Google Sign-Up (clients uniquement) -->
+                            <div class="mb-4">
+                                <p class="text-muted fs-12 text-center mb-2">Inscription rapide pour les clients</p>
+                                <div id="google-btn-register" class="d-flex justify-content-center"></div>
+                                @if (googleLoading) {
+                                    <div class="d-flex align-items-center justify-content-center gap-2 text-muted fs-13 mt-2">
+                                        <span class="spinner-border spinner-border-sm"></span>
+                                        Connexion en cours...
+                                    </div>
+                                }
+                            </div>
+
+                            <!-- Séparateur -->
+                            <div class="d-flex align-items-center gap-3 mb-4">
+                                <hr class="flex-fill m-0">
+                                <span class="text-muted fs-12 fw-medium px-1">OU inscription manuelle</span>
+                                <hr class="flex-fill m-0">
+                            </div>
 
                             <!-- Sélection type de compte -->
                             <div class="mb-4">

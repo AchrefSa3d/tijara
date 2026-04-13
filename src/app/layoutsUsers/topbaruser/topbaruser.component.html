@@ -294,10 +294,15 @@
                         <i class="ri-file-list-3-line fs-22"></i>
                     </a>
                 </div>
-                <!-- Bouton Chat Vendeurs -->
+                <!-- Bouton Messages -->
                 <div class="ms-1 header-item">
-                    <a routerLink="/shop/chat" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle" ngbTooltip="Chat Vendeurs">
+                    <a routerLink="/users/messages" class="btn btn-icon btn-topbar btn-ghost-secondary rounded-circle position-relative" ngbTooltip="Mes Messages">
                         <i class="ri-chat-3-line fs-22"></i>
+                        @if (unreadMessages > 0) {
+                          <span class="position-absolute topbar-badge fs-10 translate-middle badge rounded-pill bg-primary">
+                            {{ unreadMessages }}
+                          </span>
+                        }
                     </a>
                 </div>
                 <div class="ms-1 header-item d-none d-sm-flex">

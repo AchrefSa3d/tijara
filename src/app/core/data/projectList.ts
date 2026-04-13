@@ -63,7 +63,7 @@ const projectList = [
       cardBorderColor:"info",
     },
     {
-      title: "Velzon Project",
+      title: "TIJARA Project",
       updatedTime:"11 hr Ago",
       badgeText :"Completed",
       badgeClass:"warning",
@@ -262,7 +262,7 @@ const projectList = [
         id:6,
         icon:"ri-image-2-fill",
         iconBackgroundClass:"danger",
-        fileName:"Velzon-logo.png",
+        fileName:"TIJARA-logo.png",
         fileType:"PNG File",
         fileSize:"879 KB",
         updatedDate:"02 Nov 2021"

@@ -1,7 +1,10 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
+import { environment } from 'src/environments/environment';
+
+declare const google: any;
 
 @Component({
     selector: 'app-login',
@@ -9,7 +12,7 @@ import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
     styleUrls: ['./login.component.scss'],
     standalone: false
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
 
     loginForm!: UntypedFormGroup;
     submitted     = false;
@@ -25,10 +28,13 @@ export class LoginComponent implements OnInit {
         { email: 'user@tijara.tn',   password: 'password123', role: 'user'   },
     ];
 
+    googleLoading = false;
+
     constructor(
         private fb: UntypedFormBuilder,
         private router: Router,
         private api: TijaraApiService,
+        private ngZone: NgZone,
     ) {
         // Si déjà connecté, rediriger directement
         try {
@@ -46,6 +52,52 @@ export class LoginComponent implements OnInit {
         this.loginForm = this.fb.group({
             email:    ['', [Validators.required, Validators.email]],
             password: ['', Validators.required],
+        });
+    }
+
+    ngAfterViewInit(): void {
+        this.initGoogleSignIn();
+    }
+
+    initGoogleSignIn(): void {
+        try {
+            google.accounts.id.initialize({
+                client_id: environment.googleClientId,
+                callback: (response: any) => {
+                    this.ngZone.run(() => this.handleGoogleCredential(response.credential));
+                }
+            });
+            google.accounts.id.renderButton(
+                document.getElementById('google-btn-login'),
+                { theme: 'outline', size: 'large', width: 320, text: 'signin_with', logo_alignment: 'left' }
+            );
+        } catch (e) {}
+    }
+
+    handleGoogleCredential(credential: string): void {
+        this.googleLoading = true;
+        this.error = '';
+        this.api.googleLogin(credential).subscribe({
+            next: (res: any) => {
+                this.googleLoading = false;
+                const currentUser = {
+                    token:     res.token,
+                    id:        res.user.id,
+                    email:     res.user.email,
+                    role:      res.user.role,
+                    firstName: res.user.firstName,
+                    lastName:  res.user.lastName,
+                    phone:     res.user.phone,
+                    city:      res.user.city,
+                };
+                sessionStorage.setItem('toast', 'true');
+                sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+                this.redirectByRole(currentUser.role);
+            },
+            error: (err: any) => {
+                this.googleLoading = false;
+                this.error = err?.error?.message || 'Connexion Google échouée.';
+            }
         });
     }
 

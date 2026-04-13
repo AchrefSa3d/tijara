@@ -16,16 +16,20 @@ import { OrdersAdminComponent }       from './orders-admin/orders-admin.componen
 import { VendorsAdminComponent }      from './vendors-admin/vendors-admin.component';
 import { AnnoncesAdminComponent }     from './annonces-admin/annonces-admin.component';
 import { ProductsAdminComponent }     from './products-admin/products-admin.component';
+import { VendorDetailAdminComponent } from './vendor-detail-admin/vendor-detail-admin.component';
+import { UserDetailAdminComponent }   from './user-detail-admin/user-detail-admin.component';
 
 const routes: Routes = [
-  { path: '',              redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'dashboard',     component: DashboardAdminComponent },
-  { path: 'users',         component: UsersAdminComponent },
-  { path: 'categories',    component: CategoriesAdminComponent },
-  { path: 'orders',        component: OrdersAdminComponent },
-  { path: 'vendors',       component: VendorsAdminComponent },
-  { path: 'annonces',      component: AnnoncesAdminComponent },
-  { path: 'products',      component: ProductsAdminComponent },
+  { path: '',                   redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'dashboard',          component: DashboardAdminComponent },
+  { path: 'users',              component: UsersAdminComponent },
+  { path: 'user-detail/:id',    component: UserDetailAdminComponent },
+  { path: 'categories',         component: CategoriesAdminComponent },
+  { path: 'orders',             component: OrdersAdminComponent },
+  { path: 'vendors',            component: VendorsAdminComponent },
+  { path: 'vendor-detail/:id',  component: VendorDetailAdminComponent },
+  { path: 'annonces',           component: AnnoncesAdminComponent },
+  { path: 'products',           component: ProductsAdminComponent },
   {
     path: 'reclamations',
     loadChildren: () => import('./reclamations/reclamations.module').then(m => m.ReclamationsModule),
@@ -41,6 +45,8 @@ const routes: Routes = [
     VendorsAdminComponent,
     AnnoncesAdminComponent,
     ProductsAdminComponent,
+    VendorDetailAdminComponent,
+    UserDetailAdminComponent,
   ],
   imports: [
     CommonModule,
