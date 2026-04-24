@@ -1,5 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 @Component({
   selector: 'app-categories-admin',
@@ -14,41 +15,44 @@ export class CategoriesAdminComponent implements OnInit {
     { label: 'Catégories', active: true }
   ];
 
-  categories = [
-    { id: 1, name: 'Électronique', icon: 'ri-computer-line',      color: 'primary', products: 45, active: true  },
-    { id: 2, name: 'Mode',         icon: 'ri-t-shirt-line',        color: 'info',    products: 32, active: true  },
-    { id: 3, name: 'Maison',       icon: 'ri-home-4-line',         color: 'success', products: 28, active: true  },
-    { id: 4, name: 'Sport',        icon: 'ri-football-line',       color: 'warning', products: 19, active: true  },
-    { id: 5, name: 'Beauté',       icon: 'ri-heart-line',          color: 'danger',  products: 24, active: true  },
-    { id: 6, name: 'Jouets',       icon: 'ri-gamepad-line',        color: 'primary', products: 15, active: false },
-    { id: 7, name: 'Alimentation', icon: 'ri-restaurant-line',     color: 'success', products: 38, active: true  },
-    { id: 8, name: 'Autre',        icon: 'ri-more-line',           color: 'secondary', products: 7, active: true },
-  ];
-
-  showForm = false;
+  categories: any[] = [];
+  loading    = true;
+  saving     = false;
+  saveError  = '';
+  showForm   = false;
   editingId: number | null = null;
-  submitted = false;
+  submitted  = false;
   form!: FormGroup;
 
-  iconOptions = [
-    'ri-computer-line', 'ri-t-shirt-line', 'ri-home-4-line', 'ri-football-line',
-    'ri-heart-line', 'ri-gamepad-line', 'ri-restaurant-line', 'ri-more-line',
-    'ri-car-line', 'ri-book-line', 'ri-music-line', 'ri-camera-line'
-  ];
-
-  colorOptions = ['primary', 'info', 'success', 'warning', 'danger', 'secondary'];
-
-  constructor(private fb: FormBuilder) {}
+  constructor(private fb: FormBuilder, private api: TijaraApiService) {}
 
   ngOnInit(): void {
     this.initForm();
+    this.loadCategories();
+  }
+
+  loadCategories(): void {
+    this.loading = true;
+    // Use /all to get all categories (including inactive) for admin view
+    this.api.getCategoriesAdmin().subscribe({
+      next: (data: any[]) => { this.categories = data; this.loading = false; },
+      error: () => {
+        // Fallback to public endpoint if admin endpoint not available
+        this.api.getCategories().subscribe({
+          next: (data: any[]) => { this.categories = data; this.loading = false; },
+          error: () => { this.loading = false; }
+        });
+      }
+    });
   }
 
   initForm(cat?: any) {
     this.form = this.fb.group({
-      name:  [cat?.name  || '', [Validators.required, Validators.minLength(2)]],
-      icon:  [cat?.icon  || 'ri-more-line', Validators.required],
-      color: [cat?.color || 'primary',      Validators.required],
+      name_fr:     [cat?.name_fr || cat?.name || '', [Validators.required, Validators.minLength(2)]],
+      name_en:     [cat?.name_en || ''],
+      name_ar:     [cat?.name_ar || ''],
+      description: [cat?.description || ''],
+      image:       [cat?.image || ''],
     });
   }
 
@@ -57,6 +61,7 @@ export class CategoriesAdminComponent implements OnInit {
   openAdd() {
     this.editingId = null;
     this.submitted = false;
+    this.saveError = '';
     this.initForm();
     this.showForm = true;
   }
@@ -64,6 +69,7 @@ export class CategoriesAdminComponent implements OnInit {
   openEdit(cat: any) {
     this.editingId = cat.id;
     this.submitted = false;
+    this.saveError = '';
     this.initForm(cat);
     this.showForm = true;
   }
@@ -71,28 +77,62 @@ export class CategoriesAdminComponent implements OnInit {
   save() {
     this.submitted = true;
     if (this.form.invalid) return;
+    this.saving    = true;
+    this.saveError = '';
+
+    const payload = {
+      name_fr:     this.form.value.name_fr,
+      name_en:     this.form.value.name_en || this.form.value.name_fr,
+      name_ar:     this.form.value.name_ar,
+      description: this.form.value.description,
+      image:       this.form.value.image,
+    };
+
     if (this.editingId) {
-      const c = this.categories.find(c => c.id === this.editingId);
-      if (c) Object.assign(c, this.form.value);
+      this.api.updateCategory(this.editingId, payload).subscribe({
+        next: (updated: any) => {
+          const idx = this.categories.findIndex(c => c.id === this.editingId);
+          if (idx >= 0) this.categories[idx] = updated;
+          this.saving = false; this.showForm = false; this.submitted = false;
+        },
+        error: (err: any) => {
+          this.saving = false;
+          this.saveError = err?.error?.message || 'Erreur lors de la modification.';
+        }
+      });
     } else {
-      this.categories.push({
-        id: Date.now(), ...this.form.value, products: 0, active: true
+      this.api.createCategory(payload).subscribe({
+        next: (created: any) => {
+          this.categories.unshift(created);
+          this.saving = false; this.showForm = false; this.submitted = false;
+        },
+        error: (err: any) => {
+          this.saving = false;
+          this.saveError = err?.error?.message || 'Erreur lors de la création.';
+        }
       });
     }
-    this.showForm = false;
-    this.submitted = false;
   }
 
   cancel() {
-    this.showForm = false;
+    this.showForm  = false;
     this.submitted = false;
+    this.saveError = '';
   }
 
   toggleActive(cat: any) {
-    cat.active = !cat.active;
+    this.api.toggleCategory(cat.id).subscribe({
+      next: (res: any) => { cat.active = res.active; }
+    });
   }
 
   delete(cat: any) {
-    this.categories = this.categories.filter(c => c.id !== cat.id);
+    if (!confirm(`Désactiver la catégorie "${cat.name}" ?`)) return;
+    this.api.deleteCategory(cat.id).subscribe({
+      next: () => { cat.active = false; }
+    });
   }
+
+  get activeCount()   { return this.categories.filter(c => c.active).length; }
+  get inactiveCount() { return this.categories.filter(c => !c.active).length; }
 }

@@ -6,8 +6,9 @@ import { LayoutUsersComponent } from './layoutsUsers/layoutusers.component';
 import { LayoutEntreprisesComponent } from './layoutsEntreprises/layoutEntreprises.component';
 
 // Guards
-import { AuthGuard } from './core/guards/auth.guard';
-import { AdminGuard } from './core/guards/admin.guard'; // à créer
+import { AuthGuard }    from './core/guards/auth.guard';
+import { AdminGuard }   from './core/guards/admin.guard';
+import { UserOnlyGuard } from './core/guards/user-only.guard';
 
 const routes: Routes = [
 
@@ -55,11 +56,11 @@ const routes: Routes = [
         .then(m => m.ComponentsDashEntrepriseModule)
   },
 
-  // ─── E-Commerce / Shop (Tijara) ────────────────────────────────────
+  // ─── E-Commerce / Shop (Tijara) — réservé aux clients (role='user') ──
   {
     path: 'shop',
     component: LayoutUsersComponent,
-    canActivate: [AuthGuard],
+    canActivate: [UserOnlyGuard],
     loadChildren: () =>
       import('./pages/ecommerce/ecommerce.module')
         .then(m => m.EcommerceModule)
@@ -71,6 +72,13 @@ const routes: Routes = [
     path: 'landing',
     loadChildren: () =>
       import('./landing/landing.module').then(m => m.LandingModule)
+  },
+
+  // ─── Boutique publique — sans auth ──────────────────────────────
+  {
+    path: 'boutique',
+    loadChildren: () =>
+      import('./boutique/boutique.module').then(m => m.BoutiqueModule)
   },
 
   // ─── Pages extras (404, maintenance) ────────────────────────────

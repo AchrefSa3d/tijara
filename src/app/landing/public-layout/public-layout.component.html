@@ -1,0 +1,118 @@
+<div (window:scroll)="windowScroll()">
+
+  <!-- ══════════ NAVBAR ══════════ -->
+  <nav class="navbar navbar-expand-lg navbar-landing fixed-top" id="pub-navbar">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/landing">
+        <div style="width:34px;height:34px;background:linear-gradient(135deg,#405189,#0ab39c);border-radius:8px;display:flex;align-items:center;justify-content:center;">
+          <i class="ri-shopping-bag-3-fill text-white fs-18"></i>
+        </div>
+        <span class="fw-bold fs-20" style="color:#405189;letter-spacing:0.5px">Tijara</span>
+      </a>
+
+      <button class="navbar-toggler py-0 fs-20" type="button" (click)="menuOpen=!menuOpen">
+        <i class="mdi mdi-menu"></i>
+      </button>
+
+      <div class="collapse navbar-collapse" [class.show]="menuOpen">
+        <ul class="navbar-nav mx-auto mt-2 mt-lg-0">
+          <li class="nav-item"><a class="nav-link" routerLink="/landing">Accueil</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/landing/annonces">Annonces</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/landing/deals">Deals</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/landing/produits">Produits</a></li>
+          <li class="nav-item"><a class="nav-link" routerLink="/landing/vendeurs">Vendeurs</a></li>
+        </ul>
+
+        @if (isLoggedIn) {
+          <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-2 px-3 py-1 rounded-pill" style="background:#f0f4ff;border:1px solid #d0d9f0">
+              <div class="d-flex align-items-center justify-content-center rounded-circle fw-bold text-white"
+                   style="width:30px;height:30px;background:linear-gradient(135deg,#405189,#0ab39c);font-size:12px">
+                {{ currentUser?.firstName?.charAt(0) | uppercase }}
+              </div>
+              <span class="fw-medium fs-13 text-dark">{{ currentUser?.firstName }}</span>
+            </div>
+            <a [routerLink]="currentUser?.role==='admin' ? '/admin/dashboard' : currentUser?.role==='vendor' ? '/ent/dashboard' : '/users/dashboard'"
+               class="btn btn-sm btn-soft-primary rounded-pill px-3">Mon espace</a>
+            <button (click)="logout()" class="btn btn-sm btn-outline-secondary rounded-pill px-3">Déconnexion</button>
+          </div>
+        } @else {
+          <div class="d-flex align-items-center gap-2">
+            <a routerLink="/auth/login" class="btn btn-outline-primary btn-sm rounded-pill px-3">Connexion</a>
+            <a routerLink="/auth/register" class="btn btn-primary btn-sm rounded-pill px-3"
+               style="background:linear-gradient(135deg,#405189,#0ab39c);border:none">S'inscrire</a>
+          </div>
+        }
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page content -->
+  <div style="padding-top:70px;min-height:calc(100vh - 70px)">
+    <router-outlet></router-outlet>
+  </div>
+
+  <!-- ══════════ FOOTER ══════════ -->
+  <footer style="background:linear-gradient(135deg,#1a2241 0%,#0d1b2a 100%);padding:60px 0 0">
+    <div class="container">
+      <div class="row g-4 pb-4">
+        <div class="col-lg-4">
+          <div class="d-flex align-items-center gap-2 mb-3">
+            <div style="width:38px;height:38px;background:linear-gradient(135deg,#405189,#0ab39c);border-radius:10px;display:flex;align-items:center;justify-content:center">
+              <i class="ri-shopping-bag-3-fill text-white fs-18"></i>
+            </div>
+            <span class="fw-bold fs-22 text-white">Tijara</span>
+          </div>
+          <p style="color:rgba(255,255,255,0.5);font-size:14px;line-height:1.7">
+            La marketplace tunisienne intelligente. Achetez, vendez, échangez en toute confiance.
+          </p>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white fw-semibold mb-3 fs-13 text-uppercase" style="letter-spacing:1px">Plateforme</h6>
+          <ul class="list-unstyled footer-link-list">
+            <li><a routerLink="/landing/annonces">Annonces</a></li>
+            <li><a routerLink="/landing/deals">Deals</a></li>
+            <li><a routerLink="/landing/produits">Produits</a></li>
+            <li><a routerLink="/landing/vendeurs">Vendeurs</a></li>
+          </ul>
+        </div>
+        <div class="col-6 col-lg-2">
+          <h6 class="text-white fw-semibold mb-3 fs-13 text-uppercase" style="letter-spacing:1px">Informations</h6>
+          <ul class="list-unstyled footer-link-list">
+            <li><a routerLink="/landing/about">À propos</a></li>
+            <li><a routerLink="/landing/contact">Contact</a></li>
+            <li><a routerLink="/landing/faq">FAQ</a></li>
+            <li><a routerLink="/landing/cgu">CGU</a></li>
+            <li><a routerLink="/landing/privacy">Confidentialité</a></li>
+          </ul>
+        </div>
+        <div class="col-lg-4">
+          <h6 class="text-white fw-semibold mb-3 fs-13 text-uppercase" style="letter-spacing:1px">Newsletter</h6>
+          <p style="color:rgba(255,255,255,0.5);font-size:14px">Recevez les meilleures offres directement dans votre boîte mail.</p>
+          <div class="input-group mt-2" style="background:rgba(255,255,255,0.06);border-radius:12px;overflow:hidden;border:1px solid rgba(255,255,255,0.1)">
+            <input type="email" class="form-control border-0 text-white" style="background:transparent" placeholder="votre@email.com">
+            <button class="btn btn-primary px-3" type="button"><i class="ri-send-plane-2-line"></i></button>
+          </div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,0.08);padding:20px 0">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          <p class="mb-0" style="color:rgba(255,255,255,0.35);font-size:13px">&copy; {{ year }} Tijara. Tous droits réservés.</p>
+          <div class="d-flex gap-3">
+            <a routerLink="/landing/cgu"     style="color:rgba(255,255,255,0.35);font-size:13px;text-decoration:none">CGU</a>
+            <a routerLink="/landing/privacy" style="color:rgba(255,255,255,0.35);font-size:13px;text-decoration:none">Confidentialité</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<style>
+.footer-link-list li { margin-bottom:8px; }
+.footer-link-list a  { color:rgba(255,255,255,0.5);text-decoration:none;font-size:14px;transition:color .2s; }
+.footer-link-list a:hover { color:#0ab39c; }
+.btn-soft-primary { background:rgba(64,81,137,0.1);color:#405189;border:none; }
+.btn-soft-primary:hover { background:#405189;color:#fff; }
+</style>

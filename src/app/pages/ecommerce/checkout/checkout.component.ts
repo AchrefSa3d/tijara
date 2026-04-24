@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import { CartItem } from '../cart/cart.component';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
@@ -40,8 +41,15 @@ export class CheckoutComponent implements OnInit {
     private api: TijaraApiService
   ) {}
 
+  private get cartKey(): string {
+    try {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      return u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
+    } catch { return 'tijara_cart_guest'; }
+  }
+
   ngOnInit(): void {
-    const saved = localStorage.getItem('tijara_cart');
+    const saved = localStorage.getItem(this.cartKey);
     this.cartItems = saved ? JSON.parse(saved) : [];
     if (this.cartItems.length === 0) {
       this.router.navigate(['/shop/cart']);
@@ -53,9 +61,9 @@ export class CheckoutComponent implements OnInit {
       firstName: [user.firstName || '', [Validators.required, Validators.minLength(2)]],
       lastName:  [user.lastName  || '', [Validators.required, Validators.minLength(2)]],
       email:     [user.email     || '', [Validators.required, Validators.email]],
-      phone:     ['', [Validators.required, Validators.pattern(/^[2459]\d{7}$/)]],
-      ville:     ['', Validators.required],
-      address:   ['', [Validators.required, Validators.minLength(8)]],
+      phone:     [user.phone     || '', [Validators.required, Validators.pattern(/^[2459]\d{7}$/)]],
+      ville:     [user.city      || '', Validators.required],
+      address:   [user.address   || '', [Validators.required, Validators.minLength(8)]],
       notes:     [''],
     });
   }
@@ -82,24 +90,38 @@ export class CheckoutComponent implements OnInit {
     }
 
     const v = this.checkoutForm.value;
-    const shippingAddress = `${v.firstName} ${v.lastName}, ${v.address}, ${v.ville} — Tél: ${v.phone}`;
 
-    const orderPayload = {
-      items: this.cartItems.map((i: CartItem) => ({
-        product_id: i.product.id,
-        quantity:   i.qty
-      })),
-      shipping_address: shippingAddress,
-      notes: v.notes || null
+    // Construire un objet "detail" commun pour toutes les commandes
+    const detail = {
+      first_name: v.firstName,
+      last_name:  v.lastName,
+      email:      v.email,
+      telephone:  v.phone,
+      address:    `${v.address}, ${v.ville}`,
     };
 
+    // Créer une commande par article du panier (API accepte 1 deal par commande)
+    const requests = this.cartItems.map((item: CartItem) =>
+      this.api.createOrder({
+        id_deal: item.product.id,
+        detail:  { ...detail, quantity: item.qty }
+      })
+    );
+
+    if (requests.length === 0) {
+      this.errorMsg = 'Votre panier est vide.';
+      return;
+    }
+
     this.loading = true;
-    this.api.createOrder(orderPayload).subscribe({
-      next: (res: any) => {
-        this.loading    = false;
-        this.orderNumber = `TJR-${String(res.id).padStart(6, '0')}`;
-        localStorage.removeItem('tijara_cart');
-        this.cartItems  = [];
+    forkJoin(requests).subscribe({
+      next: (results: any[]) => {
+        this.loading     = false;
+        // Utiliser l'ID de la première commande créée
+        const firstId    = results[0]?.id ?? results[0]?.order_id ?? '0';
+        this.orderNumber = `TJR-${String(firstId).padStart(6, '0')}`;
+        localStorage.removeItem(this.cartKey);
+        this.cartItems   = [];
         this.orderPlaced = true;
       },
       error: (err: any) => {

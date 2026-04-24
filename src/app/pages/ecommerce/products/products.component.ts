@@ -43,6 +43,10 @@ export class ProductsComponent implements OnInit {
   itemsPerPage = 9;
   loading = true;
 
+  priceMin: number | null = null;
+  priceMax: number | null = null;
+  maxProductPrice = 5000;
+
   categories: string[] = ['Tous'];
 
   allProducts: Product[] = [];
@@ -79,6 +83,9 @@ export class ProductsComponent implements OnInit {
         // Build category list from products
         const cats = [...new Set(this.allProducts.map(p => p.category).filter(Boolean))];
         this.categories = ['Tous', ...cats];
+        // Set max price slider ceiling
+        const prices = this.allProducts.map(p => p.price).filter(Boolean);
+        this.maxProductPrice = prices.length ? Math.ceil(Math.max(...prices) / 100) * 100 : 5000;
         this.loading = false;
         this.applyFilters();
       },
@@ -86,8 +93,15 @@ export class ProductsComponent implements OnInit {
     });
   }
 
+  private get cartKey(): string {
+    try {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      return u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
+    } catch { return 'tijara_cart_guest'; }
+  }
+
   loadCart() {
-    const saved = localStorage.getItem('tijara_cart');
+    const saved = localStorage.getItem(this.cartKey);
     this.cartItems = saved ? JSON.parse(saved) : [];
   }
 
@@ -117,6 +131,12 @@ export class ProductsComponent implements OnInit {
         p.vendor.toLowerCase().includes(term)
       );
     }
+    if (this.priceMin !== null && this.priceMin > 0) {
+      result = result.filter(p => p.price >= this.priceMin!);
+    }
+    if (this.priceMax !== null && this.priceMax > 0) {
+      result = result.filter(p => p.price <= this.priceMax!);
+    }
     switch (this.sortBy) {
       case 'price_asc':  result.sort((a, b) => a.price - b.price); break;
       case 'price_desc': result.sort((a, b) => b.price - a.price); break;
@@ -132,6 +152,29 @@ export class ProductsComponent implements OnInit {
     this.applyFilters();
   }
 
+  resetFilters() {
+    this.searchTerm = '';
+    this.selectedCategory = 'Tous';
+    this.priceMin = null;
+    this.priceMax = null;
+    this.sortBy = 'default';
+    this.applyFilters();
+  }
+
+  get activeFilterCount(): number {
+    let count = 0;
+    if (this.selectedCategory !== 'Tous') count++;
+    if (this.searchTerm.trim()) count++;
+    if (this.priceMin) count++;
+    if (this.priceMax) count++;
+    return count;
+  }
+
+  categoryCount(cat: string): number {
+    if (cat === 'Tous') return this.allProducts.length;
+    return this.allProducts.filter(p => p.category === cat).length;
+  }
+
   getStars(rating: number): number[] {
     return Array.from({ length: 5 }, (_, i) => i + 1);
   }
@@ -139,7 +182,7 @@ export class ProductsComponent implements OnInit {
   addToCart(product: Product) {
     const existing = this.cartItems.find(i => i.product.id === product.id);
     if (existing) { existing.qty++; } else { this.cartItems.push({ product, qty: 1 }); }
-    localStorage.setItem('tijara_cart', JSON.stringify(this.cartItems));
+    localStorage.setItem(this.cartKey, JSON.stringify(this.cartItems));
     const btn = document.getElementById('cart-btn-' + product.id);
     if (btn) {
       btn.classList.add('btn-success');

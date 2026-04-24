@@ -35,7 +35,7 @@ export const MENU: MenuItem[] = [
       {
         id: 13,
         label: 'MENUITEMS.PRODUCTS.LIST.ADD',
-        link: '/ent/products/add',
+        link: '/ent/products?action=add',   // stays on same page, triggers form
         parentId: 11
       }
     ]
@@ -79,6 +79,32 @@ export const MENU: MenuItem[] = [
     label: 'Deals & Promos',
     icon: 'ri-price-tag-3-line',
     link: '/ent/deals',
+  },
+
+  // ─── COMMUNAUTÉ ──────────────────────────────────────────────────────────
+  {
+    id: 47,
+    label: 'Communauté',
+    isTitle: true
+  },
+  {
+    id: 48,
+    label: 'Mes Abonnés',
+    icon: 'ri-user-heart-line',
+    link: '/ent/followers',
+  },
+
+  // ─── MON COMPTE ───────────────────────────────────────────────────────────
+  {
+    id: 45,
+    label: 'MENUITEMS.ACCOUNT.TEXT',
+    isTitle: true
+  },
+  {
+    id: 46,
+    label: 'Mon Profil',
+    icon: 'ri-user-settings-line',
+    link: '/ent/profile',
   },
 
   // ─── SUPPORT ──────────────────────────────────────────────────────────────

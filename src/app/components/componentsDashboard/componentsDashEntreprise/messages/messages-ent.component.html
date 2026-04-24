@@ -140,13 +140,13 @@
                   {{ getInitials(msg.sender_name) }}
                 </div>
                 <div>
-                  <div class="bubble">{{ msg.content }}</div>
+                  <div class="bubble">{{ msg.message }}</div>
                   <div class="msg-time">{{ msg.created_at | date:'HH:mm' }}</div>
                 </div>
               </div>
             } @else {
               <div>
-                <div class="bubble">{{ msg.content }}</div>
+                <div class="bubble">{{ msg.message }}</div>
                 <div class="msg-time">
                   {{ msg.created_at | date:'HH:mm' }}
                   <i class="ri-check-double-line text-info ms-1"></i>

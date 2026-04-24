@@ -96,7 +96,8 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
     this.sending = true;
     this.api.sendMessage(this.selectedConv.id, text).subscribe({
       next: (msg: any) => {
-        this.messages.push(msg);
+        // Normalize: ensure is_mine = true since we just sent it
+        this.messages.push({ ...msg, is_mine: true });
         this.newMessage    = '';
         this.sending       = false;
         this.shouldScroll  = true;
@@ -119,8 +120,9 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
     if (!this.searchTerm.trim()) return this.conversations;
     const t = this.searchTerm.toLowerCase();
     return this.conversations.filter(c =>
-      c.client_name?.toLowerCase().includes(t) ||
-      c.vendor_name?.toLowerCase().includes(t) ||
+      c.other_name?.toLowerCase().includes(t) ||
+      c.sender_name?.toLowerCase().includes(t) ||
+      c.receiver_name?.toLowerCase().includes(t) ||
       c.product_name?.toLowerCase().includes(t) ||
       c.last_message?.toLowerCase().includes(t)
     );
@@ -131,7 +133,9 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   isMyMessage(msg: any): boolean {
-    return msg.sender_id === this.currentUserId;
+    // API returns is_mine directly; fallback to sender_id comparison
+    if (msg.is_mine !== undefined) return msg.is_mine;
+    return Number(msg.sender_id) === Number(this.currentUserId);
   }
 
   getInitials(name: string): string {
@@ -145,12 +149,13 @@ export class MessagesEntComponent implements OnInit, OnDestroy, AfterViewChecked
   }
 
   getOtherName(conv: any): string {
-    // For vendor: show client name; for client: show vendor name
-    return conv.client_name || conv.vendor_name || 'Client';
+    // API returns other_name = the person who is NOT the current user
+    return conv.other_name || conv.sender_name || conv.receiver_name || 'Client';
   }
 
   getOtherEmail(conv: any): string {
-    return conv.client_email || conv.vendor_email || '';
+    // API does not return email in conversation list
+    return conv.other_email || '';
   }
 
   private scrollBottom(): void {

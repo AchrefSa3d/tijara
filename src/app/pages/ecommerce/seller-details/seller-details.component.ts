@@ -27,6 +27,8 @@ export class SellerDetailsComponent implements OnInit {
   contactSending  = false;
   contactSuccess  = '';
   contactError    = '';
+  isFollowing   = false;
+  followLoading = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -34,10 +36,17 @@ export class SellerDetailsComponent implements OnInit {
     private api: TijaraApiService
   ) {}
 
+  private get cartKey(): string {
+    try {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      return u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
+    } catch { return 'tijara_cart_guest'; }
+  }
+
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
     if (!id) { this.error = 'Vendeur introuvable.'; this.loading = false; return; }
-    const saved = localStorage.getItem('tijara_cart');
+    const saved = localStorage.getItem(this.cartKey);
     this.cartItems = saved ? JSON.parse(saved) : [];
 
     this.api.getVendorProfile(id).subscribe({
@@ -45,6 +54,7 @@ export class SellerDetailsComponent implements OnInit {
         this.vendor   = res.vendor;
         this.products = res.products;
         this.loading  = false;
+        this.checkFollowStatus();
       },
       error: () => { this.error = 'Vendeur introuvable.'; this.loading = false; }
     });
@@ -56,7 +66,9 @@ export class SellerDetailsComponent implements OnInit {
   }
 
   get displayName(): string {
-    return this.vendor?.shop_name || `${this.vendor?.first_name} ${this.vendor?.last_name}`;
+    return this.vendor?.display_name
+        || this.vendor?.shop_name
+        || `${this.vendor?.first_name || ''} ${this.vendor?.last_name || ''}`.trim();
   }
 
   get memberSince(): string {
@@ -75,7 +87,24 @@ export class SellerDetailsComponent implements OnInit {
   addToCart(product: any) {
     const existing = this.cartItems.find((i: any) => i.product.id === product.id);
     if (existing) { existing.qty++; } else { this.cartItems.push({ product, qty: 1 }); }
-    localStorage.setItem('tijara_cart', JSON.stringify(this.cartItems));
+    localStorage.setItem(this.cartKey, JSON.stringify(this.cartItems));
+  }
+
+  checkFollowStatus(): void {
+    if (!this.isLoggedIn || !this.vendor?.id) return;
+    this.api.checkFollow(this.vendor.id).subscribe({
+      next: (res: any) => { this.isFollowing = res.following; },
+      error: () => {}
+    });
+  }
+
+  toggleFollow(): void {
+    if (!this.isLoggedIn) { this.router.navigate(['/auth/login']); return; }
+    this.followLoading = true;
+    this.api.toggleFollow(this.vendor.id).subscribe({
+      next: (res: any) => { this.isFollowing = res.following; this.followLoading = false; },
+      error: () => { this.followLoading = false; }
+    });
   }
 
   goDetail(id: number) { this.router.navigate(['/shop/product-detail', id]); }

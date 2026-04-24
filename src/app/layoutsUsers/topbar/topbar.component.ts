@@ -176,11 +176,16 @@ export class TopbarComponent implements OnInit {
    * Logout the user
    */
   logout() {
-        localStorage.removeItem('currentUser');
+    try {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (u?.id) localStorage.removeItem(`tijara_cart_${u.id}`);
+    } catch {}
+    localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
     localStorage.removeItem('toast');
+    localStorage.removeItem('tijara_cart');
     sessionStorage.clear();
-    this.router.navigate(['/auth/login']);
+    window.location.href = '/auth/login';
   }
 
   windowScroll() {

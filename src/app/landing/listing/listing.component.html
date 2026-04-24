@@ -1,0 +1,300 @@
+<div class="listing-page">
+
+  <!-- Login toast -->
+  @if (showLoginToast) {
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+    <div class="toast show border-0 shadow-lg rounded-4">
+      <div class="toast-body p-4">
+        <div class="d-flex align-items-start gap-3">
+          <div class="d-flex align-items-center justify-content-center flex-shrink-0 rounded-circle" style="width:40px;height:40px;background:linear-gradient(135deg,#405189,#0ab39c)">
+            <i class="ri-lock-2-line text-white fs-16"></i>
+          </div>
+          <div>
+            <div class="fw-semibold fs-14 mb-1">Connexion requise</div>
+            <div class="text-muted fs-13 mb-2">Connectez-vous pour passer commande.</div>
+            <a routerLink="/auth/login" class="btn btn-sm btn-primary rounded-pill px-3">Se connecter</a>
+          </div>
+          <button class="btn-close ms-2" (click)="showLoginToast=false"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- ══ HERO BANNER ══ -->
+  <section class="page-hero">
+    <div class="container">
+      <div class="d-flex align-items-center gap-3 mb-3">
+        <div class="d-flex align-items-center justify-content-center rounded-circle" style="width:50px;height:50px;background:rgba(255,255,255,0.15)">
+          <i class="{{ config.icon }} fs-24 text-white"></i>
+        </div>
+        <h1 class="fw-bold fs-28 mb-0">{{ config.title }}</h1>
+      </div>
+      <!-- Global search -->
+      <div class="search-bar d-flex align-items-center" style="max-width:580px">
+        <i class="ri-search-line text-white me-2 fs-18"></i>
+        <input class="form-control" placeholder="Rechercher dans {{ config.title.toLowerCase() }}..."
+               [(ngModel)]="search" (input)="applyFilters()">
+        @if (search) {
+          <button class="btn btn-sm text-white opacity-75 p-0" (click)="search=''; applyFilters()">
+            <i class="ri-close-line fs-16"></i>
+          </button>
+        }
+      </div>
+      <div class="d-flex align-items-center gap-3 mt-3 flex-wrap">
+        <span class="badge rounded-pill text-white fw-normal" style="background:rgba(255,255,255,0.2);font-size:0.82rem">
+          <i class="ri-filter-3-line me-1"></i>{{ total }} résultat(s)
+        </span>
+        <span class="badge rounded-pill text-white fw-normal" style="background:rgba(255,255,255,0.15);font-size:0.82rem">
+          Page {{ page }} / {{ totalPages || 1 }}
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="container py-4">
+    <div class="row g-4">
+
+      <!-- ══ FILTERS SIDEBAR ══ -->
+      <div class="col-lg-3">
+        <div class="filter-card">
+
+          <!-- Categories -->
+          @if (type !== 'vendeurs') {
+          <div class="mb-4">
+            <div class="filter-title"><i class="ri-list-check me-1"></i>Catégorie</div>
+            <div class="cat-item" [class.active]="selectedCat===''" (click)="selectedCat=''; applyFilters()">
+              <span>Toutes</span>
+              <span class="badge bg-light text-dark fs-11">{{ allItems.length }}</span>
+            </div>
+            @for (cat of categories; track cat.id) {
+              <div class="cat-item" [class.active]="selectedCat===cat.id?.toString()"
+                   (click)="selectedCat=cat.id?.toString(); applyFilters()">
+                <span>{{ cat.name || cat.name_fr || cat.title }}</span>
+              </div>
+            }
+          </div>
+          }
+
+          <!-- Price range -->
+          @if (type !== 'vendeurs') {
+          <div class="mb-4">
+            <div class="filter-title"><i class="ri-money-dollar-circle-line me-1"></i>Prix (DT)</div>
+            <div class="d-flex gap-2">
+              <input type="number" class="form-control form-control-sm" placeholder="Min" [(ngModel)]="priceMin" (input)="applyFilters()">
+              <input type="number" class="form-control form-control-sm" placeholder="Max" [(ngModel)]="priceMax" (input)="applyFilters()">
+            </div>
+          </div>
+          }
+
+          <!-- Sort -->
+          <div class="mb-3">
+            <div class="filter-title"><i class="ri-sort-desc me-1"></i>Trier par</div>
+            <select class="form-select form-select-sm" [(ngModel)]="sortBy" (change)="applyFilters()">
+              <option value="newest">Plus récent</option>
+              <option value="oldest">Plus ancien</option>
+              @if (type !== 'vendeurs') {
+                <option value="price_asc">Prix croissant</option>
+                <option value="price_desc">Prix décroissant</option>
+              }
+              <option value="rating">Mieux notés</option>
+            </select>
+          </div>
+
+          <!-- Reset -->
+          <button class="btn btn-sm btn-outline-secondary w-100" (click)="resetFilters()">
+            <i class="ri-refresh-line me-1"></i>Réinitialiser
+          </button>
+        </div>
+      </div>
+
+      <!-- ══ CONTENT ══ -->
+      <div class="col-lg-9">
+
+        <!-- Sort bar -->
+        <div class="sort-bar mb-3 d-flex align-items-center justify-content-between">
+          <span class="results text-muted">
+            <strong class="text-dark">{{ total }}</strong> résultat(s) trouvé(s)
+          </span>
+          <div class="d-flex align-items-center gap-2">
+            <button class="btn btn-sm" [class.btn-primary]="viewMode==='grid'" [class.btn-outline-secondary]="viewMode!=='grid'"
+                    style="border-radius:8px" (click)="viewMode='grid'">
+              <i class="ri-grid-line"></i>
+            </button>
+            <button class="btn btn-sm" [class.btn-primary]="viewMode==='list'" [class.btn-outline-secondary]="viewMode!=='list'"
+                    style="border-radius:8px" (click)="viewMode='list'">
+              <i class="ri-list-check-2"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        @if (loading) {
+          <div class="text-center py-5">
+            <div class="spinner-border text-primary mb-2"></div>
+            <p class="text-muted">Chargement...</p>
+          </div>
+        }
+
+        <!-- Empty -->
+        @else if (filtered.length === 0) {
+          <div class="text-center py-5">
+            <i class="{{ config.icon }} fs-48 text-muted opacity-25 d-block mb-3"></i>
+            <h5 class="text-muted">{{ config.emptyMsg }}</h5>
+            <button class="btn btn-outline-primary mt-2" (click)="resetFilters()">Effacer les filtres</button>
+          </div>
+        }
+
+        <!-- VENDORS -->
+        @else if (type === 'vendeurs') {
+          <div class="row g-3">
+            @for (item of paginated; track item.id) {
+              <div class="col-sm-6 col-xl-4">
+                <div class="vendor-card" (click)="goDetail(item)">
+                  <div class="vendor-avatar" [style.background]="item.bgColor">
+                    {{ item.title.charAt(0) }}
+                  </div>
+                  <div class="vendor-name mb-1">{{ item.title }}</div>
+                  @if (item.isVerified) {
+                    <span class="badge bg-success-subtle text-success fs-11 mb-2">
+                      <i class="ri-verified-badge-line me-1"></i>Vérifié
+                    </span>
+                  }
+                  <div class="text-muted fs-12 mb-2">
+                    <i class="ri-map-pin-2-line me-1"></i>{{ item.location || 'Tunisie' }}
+                  </div>
+                  @if (item.rating > 0) {
+                    <div class="d-flex align-items-center justify-content-center gap-1 mb-1">
+                      @for (s of getStars(item.rating); track $index) {
+                        <i class="ri-star-fill stars"></i>
+                      }
+                      <span class="text-muted fs-11">({{ item.reviews }})</span>
+                    </div>
+                  }
+                  <div class="text-muted fs-12">
+                    <i class="ri-box-3-line me-1"></i>{{ item.productCount }} produits
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- GRID VIEW -->
+        @else if (viewMode === 'grid') {
+          <div class="row g-3">
+            @for (item of paginated; track item.id) {
+              <div class="col-sm-6 col-xl-4">
+                <div class="product-card">
+                  <div class="card-img-top" [style.background]="item.bgColor" (click)="goDetail(item)">
+                    @if (item.image) { <img [src]="item.image" [alt]="item.title"> }
+                    @else { <i class="{{ config.icon }}"></i> }
+                    @if (item.badge) {
+                      <span class="badge-overlay"
+                            [class.bg-danger]="item.badge?.includes('%')"
+                            [class.bg-primary]="!item.badge?.includes('%')">
+                        {{ item.badge }}
+                      </span>
+                    }
+                  </div>
+                  <div class="card-body">
+                    <div class="item-meta mb-1">
+                      <i class="ri-map-pin-2-line me-1"></i>{{ item.location }}
+                      <span class="ms-2"><i class="ri-time-line me-1"></i>{{ formatDate(item.date) }}</span>
+                    </div>
+                    <div class="item-title mb-2" (click)="goDetail(item)">{{ item.title }}</div>
+                    @if (item.rating > 0) {
+                      <div class="d-flex align-items-center gap-1 mb-2">
+                        @for (s of getStars(item.rating); track $index) {
+                          <i class="ri-star-fill stars"></i>
+                        }
+                        <span class="text-muted fs-11">({{ item.reviews }})</span>
+                      </div>
+                    }
+                    @if (type !== 'annonces' || item.price > 0) {
+                      <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                          <span class="item-price">{{ formatPrice(item.price) }} DT</span>
+                          @if (item.oldPrice) { <span class="old-price ms-2">{{ formatPrice(item.oldPrice) }}</span> }
+                        </div>
+                        <button class="btn btn-sm btn-primary rounded-pill"
+                                style="background:linear-gradient(135deg,#405189,#0ab39c);border:none"
+                                (click)="addToCart(item)">
+                          <i class="ri-shopping-cart-line"></i>
+                        </button>
+                      </div>
+                    }
+                    <div class="item-meta mt-1">
+                      <i class="ri-store-2-line me-1"></i>{{ item.vendor }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- LIST VIEW -->
+        @else {
+          <div class="d-flex flex-column gap-3">
+            @for (item of paginated; track item.id) {
+              <div class="product-card-list d-flex gap-3 align-items-start" (click)="goDetail(item)">
+                <div class="list-img-placeholder" [style.background]="item.bgColor">
+                  @if (item.image) { <img class="list-img" [src]="item.image" [alt]="item.title"> }
+                  @else { <i class="{{ config.icon }} fs-24 opacity-50 text-white"></i> }
+                </div>
+                <div class="flex-fill">
+                  <div class="d-flex align-items-start justify-content-between gap-2 flex-wrap">
+                    <h6 class="fw-semibold mb-1 fs-14">{{ item.title }}</h6>
+                    @if (item.badge) {
+                      <span class="badge fs-11" [class.bg-danger]="item.badge?.includes('%')" [class.bg-primary]="!item.badge?.includes('%')">
+                        {{ item.badge }}
+                      </span>
+                    }
+                  </div>
+                  @if (item.description) {
+                    <p class="text-muted fs-12 mb-2" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+                      {{ item.description }}
+                    </p>
+                  }
+                  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                    <div class="d-flex gap-3 text-muted fs-12">
+                      <span><i class="ri-map-pin-2-line me-1"></i>{{ item.location }}</span>
+                      <span><i class="ri-time-line me-1"></i>{{ formatDate(item.date) }}</span>
+                      <span><i class="ri-store-2-line me-1"></i>{{ item.vendor }}</span>
+                    </div>
+                    @if (item.price > 0) {
+                      <div class="d-flex align-items-center gap-2">
+                        @if (item.oldPrice) { <span class="text-muted text-decoration-line-through fs-12">{{ formatPrice(item.oldPrice) }}</span> }
+                        <span class="fw-bold fs-15" style="color:#0ab39c">{{ formatPrice(item.price) }} DT</span>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ══ PAGINATION ══ -->
+        @if (totalPages > 1) {
+          <div class="pagination-bar mt-4">
+            <button class="page-btn" [disabled]="page===1" (click)="goPage(page-1)">
+              <i class="ri-arrow-left-s-line"></i>
+            </button>
+            @for (p of pages; track p) {
+              <button class="page-btn" [class.active]="p===page" (click)="goPage(p)">{{ p }}</button>
+            }
+            <button class="page-btn" [disabled]="page===totalPages" (click)="goPage(page+1)">
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+          </div>
+          <div class="text-center text-muted fs-12 mt-2">
+            Affichage {{ (page-1)*pageSize+1 }}–{{ page*pageSize > total ? total : page*pageSize }} sur {{ total }}
+          </div>
+        }
+
+      </div>
+    </div>
+  </div>
+</div>

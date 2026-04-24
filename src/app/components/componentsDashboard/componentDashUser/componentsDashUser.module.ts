@@ -12,6 +12,7 @@ import { OrdersUserComponent }     from './orders/orders-user.component';
 import { ProfileUserComponent }    from './profile/profile-user.component';
 import { AnnoncesUserComponent }   from './annonces/annonces-user.component';
 import { MessagesUserComponent }   from './messages/messages-user.component';
+import { WishlistUserComponent }   from './wishlist/wishlist-user.component';
 
 const routes: Routes = [
   { path: '',             redirectTo: 'dashboard', pathMatch: 'full' },
@@ -20,6 +21,7 @@ const routes: Routes = [
   { path: 'profile',     component: ProfileUserComponent },
   { path: 'annonces',    component: AnnoncesUserComponent },
   { path: 'messages',    component: MessagesUserComponent },
+  { path: 'wishlist',    component: WishlistUserComponent },
   {
     path: 'reclamations',
     loadChildren: () =>
@@ -35,6 +37,7 @@ const routes: Routes = [
     ProfileUserComponent,
     AnnoncesUserComponent,
     MessagesUserComponent,
+    WishlistUserComponent,
   ],
   imports: [
     CommonModule,

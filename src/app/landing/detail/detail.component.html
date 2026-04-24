@@ -1,0 +1,339 @@
+<div class="detail-page">
+
+  <!-- Login toast -->
+  @if (showLoginToast) {
+  <div class="position-fixed bottom-0 end-0 p-3" style="z-index:9999">
+    <div class="toast show rounded-4 border-0 shadow-lg">
+      <div class="toast-body p-4">
+        <div class="d-flex gap-3 align-items-start">
+          <div class="rounded-circle d-flex align-items-center justify-content-center flex-shrink-0"
+               style="width:40px;height:40px;background:linear-gradient(135deg,#405189,#0ab39c)">
+            <i class="ri-lock-2-line text-white fs-16"></i>
+          </div>
+          <div>
+            <div class="fw-semibold mb-1">Connexion requise</div>
+            <div class="text-muted fs-13 mb-2">Connectez-vous pour commander.</div>
+            <a routerLink="/auth/login" class="btn btn-sm btn-primary rounded-pill px-3">Se connecter</a>
+          </div>
+          <button class="btn-close ms-auto" (click)="showLoginToast=false"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <div class="container">
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a routerLink="/landing" class="text-decoration-none">Accueil</a></li>
+        <li class="breadcrumb-item">
+          <a [routerLink]="'/landing/' + type" class="text-decoration-none">
+            {{ type === 'annonces' ? 'Annonces' : type === 'deals' ? 'Deals' : 'Produits' }}
+          </a>
+        </li>
+        <li class="breadcrumb-item active text-truncate" style="max-width:200px">{{ item?.title }}</li>
+      </ol>
+    </nav>
+
+    @if (loading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary mb-3"></div>
+        <p class="text-muted">Chargement de l'article...</p>
+      </div>
+    } @else if (!item) {
+      <div class="text-center py-5">
+        <i class="ri-error-warning-line fs-48 text-muted d-block mb-3"></i>
+        <h5 class="text-muted">Article introuvable</h5>
+        <button class="btn btn-primary mt-2" (click)="back()">Retour</button>
+      </div>
+    } @else {
+      <div class="row g-4">
+
+        <!-- ══ LEFT — Images + Infos ══ -->
+        <div class="col-lg-8">
+
+          <!-- Main image -->
+          <div class="img-main mb-3">
+            @if (item.images?.length > 0) {
+              <img [src]="item.images[selectedImage]" [alt]="item.title">
+            } @else if (item.image) {
+              <img [src]="item.image" [alt]="item.title">
+            } @else {
+              <div class="d-flex flex-column align-items-center justify-content-center w-100 h-100"
+                   [style.background]="item.bgColor">
+                <i class="ri-image-2-line placeholder-icon text-white"></i>
+              </div>
+            }
+          </div>
+
+          <!-- Thumbnails -->
+          @if (item.images?.length > 1) {
+            <div class="d-flex gap-2 mb-4">
+              @for (img of item.images; track $index) {
+                <div class="img-thumb" [class.active]="selectedImage === $index" (click)="selectedImage = $index">
+                  <img [src]="img" [alt]="'Image ' + ($index+1)">
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Description -->
+          <div class="info-card mb-3">
+            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+              <i class="ri-file-text-line text-primary"></i> Description
+            </h5>
+            <p class="text-muted lh-lg" style="white-space:pre-line">{{ item.description || 'Aucune description disponible.' }}</p>
+            @if (item.details) {
+              <hr>
+              <h6 class="fw-semibold mb-2">Détails</h6>
+              <p class="text-muted lh-lg" style="white-space:pre-line">{{ item.details }}</p>
+            }
+          </div>
+
+          <!-- Meta info -->
+          <div class="info-card">
+            <h5 class="fw-bold mb-3 d-flex align-items-center gap-2">
+              <i class="ri-information-line text-primary"></i> Informations
+            </h5>
+            <div class="row g-3">
+              <div class="col-sm-6">
+                <div class="d-flex gap-2 align-items-center text-muted">
+                  <i class="ri-grid-line fs-16 text-primary"></i>
+                  <span class="fs-13">Catégorie : <strong class="text-dark">{{ item.category || '—' }}</strong></span>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="d-flex gap-2 align-items-center text-muted">
+                  <i class="ri-map-pin-2-line fs-16 text-primary"></i>
+                  <span class="fs-13">Localisation : <strong class="text-dark">{{ item.location || '—' }}</strong></span>
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="d-flex gap-2 align-items-center text-muted">
+                  <i class="ri-calendar-line fs-16 text-primary"></i>
+                  <span class="fs-13">Publié le : <strong class="text-dark">{{ formatDate(item.date) }}</strong></span>
+                </div>
+              </div>
+              @if (item.stock != null) {
+                <div class="col-sm-6">
+                  <div class="d-flex gap-2 align-items-center text-muted">
+                    <i class="ri-stack-line fs-16 text-primary"></i>
+                    <span class="fs-13">Stock : <strong class="text-dark">{{ item.stock }}</strong></span>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ RIGHT — Price + Actions ══ -->
+        <div class="col-lg-4">
+
+          <!-- Price block -->
+          <div class="info-card mb-3">
+            @if (item.badge) {
+              <span class="badge bg-danger mb-2">{{ item.badge }}</span>
+            }
+            <h4 class="fw-bold mb-1 lh-sm">{{ item.title }}</h4>
+
+            @if (item.rating > 0) {
+              <div class="d-flex align-items-center gap-1 mb-3">
+                @for (s of getStars(item.rating); track $index) {
+                  <i class="ri-star-fill stars-filled fs-14"></i>
+                }
+                @for (s of getEmptyStars(item.rating); track $index) {
+                  <i class="ri-star-line stars-empty fs-14"></i>
+                }
+                <span class="text-muted fs-12">({{ item.reviews }} avis)</span>
+              </div>
+            }
+
+            <div class="price-block mb-3">
+              @if (item.price > 0) {
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span class="price-main">{{ formatPrice(item.price) }} DT</span>
+                  @if (item.oldPrice) { <span class="price-old">{{ formatPrice(item.oldPrice) }} DT</span> }
+                  @if (item.discount) { <span class="discount-badge">-{{ item.discount }}%</span> }
+                </div>
+              } @else {
+                <span class="fs-18 fw-bold text-muted">Prix à négocier</span>
+              }
+            </div>
+
+            @if (type === 'produits' && item.stock != null) {
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <label class="fw-medium fs-13">Quantité :</label>
+                <div class="d-flex align-items-center border rounded-pill overflow-hidden">
+                  <button class="btn btn-sm border-0 px-3" (click)="qty = qty > 1 ? qty-1 : 1">−</button>
+                  <span class="px-2 fw-bold">{{ qty }}</span>
+                  <button class="btn btn-sm border-0 px-3" (click)="qty = qty < item.stock ? qty+1 : qty">+</button>
+                </div>
+              </div>
+            }
+
+            <button class="btn w-100 fw-semibold py-2 mb-2"
+                    style="background:linear-gradient(135deg,#405189,#0ab39c);color:#fff;border:none;border-radius:10px"
+                    (click)="addToCart()">
+              <i class="ri-shopping-cart-line me-2"></i>
+              {{ type === 'annonces' ? 'Contacter le vendeur' : 'Ajouter au panier' }}
+            </button>
+
+            <button class="btn w-100 py-2" style="border-radius:10px"
+                    [class.btn-danger]="isWishlisted"
+                    [class.btn-outline-secondary]="!isWishlisted"
+                    [disabled]="wishlistLoading"
+                    (click)="toggleWishlist()">
+              <i [class]="isWishlisted ? 'ri-heart-fill me-2' : 'ri-heart-line me-2'"></i>
+              {{ isWishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris' }}
+            </button>
+          </div>
+
+          <!-- Vendor card -->
+          <div class="vendor-card mb-3">
+            <div class="d-flex align-items-center gap-3 mb-3">
+              <div class="vendor-avatar" [style.background]="item.bgColor">
+                {{ item.vendor?.charAt(0) || 'V' }}
+              </div>
+              <div>
+                <div class="fw-semibold fs-14">{{ item.vendor || 'Vendeur Tijara' }}</div>
+                <span class="badge bg-success-subtle text-success fs-11">
+                  <i class="ri-verified-badge-line me-1"></i>Vérifié
+                </span>
+              </div>
+            </div>
+            @if (item.phone) {
+              <div class="d-flex align-items-center gap-2 text-muted fs-13 mb-2">
+                <i class="ri-phone-line text-primary"></i> {{ item.phone }}
+              </div>
+            }
+            <div class="d-flex gap-2">
+              <a routerLink="/auth/login" class="btn btn-sm btn-primary rounded-pill flex-fill text-center">
+                <i class="ri-message-2-line me-1"></i>Envoyer un message
+              </a>
+            </div>
+          </div>
+
+          <!-- Share -->
+          <div class="info-card">
+            <div class="fw-semibold fs-13 mb-2"><i class="ri-share-line me-1"></i>Partager</div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-sm flex-fill" style="background:#1877f2;color:#fff;border-radius:8px">
+                <i class="ri-facebook-fill me-1"></i>Facebook
+              </button>
+              <button class="btn btn-sm flex-fill" style="background:#25d366;color:#fff;border-radius:8px">
+                <i class="ri-whatsapp-line me-1"></i>WhatsApp
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ REVIEWS ══ -->
+      <div class="mt-5">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <h4 class="fw-bold mb-0">
+            <i class="ri-star-line me-2 text-warning"></i>Avis clients
+            @if (reviewSummary?.total > 0) {
+              <span class="badge bg-warning-subtle text-warning ms-2 fs-14">{{ reviewSummary.average | number:'1.1-1' }}/5</span>
+            }
+          </h4>
+          <button class="btn btn-sm btn-primary rounded-pill" (click)="showReviewForm = !showReviewForm">
+            <i class="ri-edit-line me-1"></i>Laisser un avis
+          </button>
+        </div>
+
+        <!-- Review form -->
+        @if (showReviewForm) {
+          <div class="info-card mb-4" style="border-left:3px solid #405189">
+            @if (reviewError) { <div class="alert alert-danger py-2">{{ reviewError }}</div> }
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Note</label>
+              <div class="d-flex gap-2">
+                @for (n of [1,2,3,4,5]; track n) {
+                  <button class="btn btn-sm p-0" style="background:none;border:none;font-size:24px"
+                          (click)="setRating(n)">
+                    <i [class]="n <= reviewRating ? 'ri-star-fill text-warning' : 'ri-star-line text-muted'"></i>
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-semibold">Commentaire</label>
+              <textarea class="form-control" rows="3" [(ngModel)]="reviewComment"
+                        placeholder="Partagez votre expérience..."></textarea>
+            </div>
+            <div class="d-flex gap-2">
+              <button class="btn btn-primary btn-sm px-4" (click)="submitReview()" [disabled]="reviewSubmitting">
+                @if (reviewSubmitting) { <span class="spinner-border spinner-border-sm me-1"></span> }
+                Publier
+              </button>
+              <button class="btn btn-outline-secondary btn-sm" (click)="showReviewForm=false">Annuler</button>
+            </div>
+          </div>
+        }
+
+        <!-- Reviews list -->
+        @if (reviews.length === 0) {
+          <div class="text-center py-4 text-muted">
+            <i class="ri-star-line fs-32 d-block mb-2 opacity-30"></i>
+            <p class="mb-0">Aucun avis pour le moment. Soyez le premier !</p>
+          </div>
+        }
+        @for (rev of reviews; track rev.idReview) {
+          <div class="info-card mb-3">
+            <div class="d-flex align-items-start gap-3">
+              <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white flex-shrink-0"
+                   style="width:38px;height:38px;background:linear-gradient(135deg,#405189,#0ab39c);font-size:14px">
+                {{ rev.authorName?.charAt(0) || '?' }}
+              </div>
+              <div class="flex-fill">
+                <div class="d-flex align-items-center justify-content-between mb-1">
+                  <span class="fw-semibold fs-14">{{ rev.authorName || 'Anonyme' }}</span>
+                  <span class="text-muted fs-12">{{ rev.createdAt | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="d-flex gap-1 mb-2">
+                  @for (s of [1,2,3,4,5]; track s) {
+                    <i [class]="s <= rev.rating ? 'ri-star-fill text-warning fs-13' : 'ri-star-line text-muted fs-13'"></i>
+                  }
+                </div>
+                @if (rev.comment) { <p class="text-muted fs-13 mb-0 lh-lg">{{ rev.comment }}</p> }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- ══ SIMILAR ITEMS ══ -->
+      @if (similar.length > 0) {
+        <div class="mt-5">
+          <h4 class="fw-bold mb-4">
+            <i class="ri-layout-grid-line me-2 text-primary"></i>Articles similaires
+          </h4>
+          <div class="row g-3">
+            @for (sim of similar; track sim.id) {
+              <div class="col-sm-6 col-md-3">
+                <div class="similar-card" (click)="goSimilar(sim)">
+                  <div class="sim-img" [style.background]="sim.bgColor">
+                    @if (sim.image) { <img class="sim-img" [src]="sim.image" [alt]="sim.title"> }
+                    @else { <i class="ri-image-2-line fs-32 text-white opacity-30"></i> }
+                  </div>
+                  <div class="p-3">
+                    <div class="fw-semibold fs-13 mb-1" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">
+                      {{ sim.title }}
+                    </div>
+                    @if (sim.price > 0) {
+                      <div class="fw-bold" style="color:#0ab39c">{{ formatPrice(sim.price) }} DT</div>
+                    }
+                    <div class="text-muted fs-11 mt-1"><i class="ri-store-2-line me-1"></i>{{ sim.vendor }}</div>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    }
+  </div>
+</div>

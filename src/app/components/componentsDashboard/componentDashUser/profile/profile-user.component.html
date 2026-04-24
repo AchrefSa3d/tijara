@@ -1,294 +1,313 @@
 <app-breadcrumbs title="Mon Profil" [breadcrumbItems]="breadcrumbItems"></app-breadcrumbs>
 
-<!-- ── BANNER ── -->
-<div class="position-relative mb-5" style="height:170px;border-radius:20px;overflow:hidden;
-     background:linear-gradient(135deg,#405189 0%,#0ab39c 100%)">
-  <div class="position-absolute top-0 start-0 w-100 h-100"
-       style="background:radial-gradient(circle at 80% 50%,rgba(255,255,255,.08) 0%,transparent 60%)"></div>
-  <!-- Avatar -->
-  <div class="position-absolute" style="bottom:-48px;left:36px">
-    <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow"
-         style="width:96px;height:96px;font-size:34px;
-                background:linear-gradient(135deg,#405189,#0ab39c);
-                border:4px solid #fff">
-      @if (loading) {
-        <span class="spinner-border spinner-border-sm text-white"></span>
-      } @else {
-        {{ initials }}
-      }
+@if (loading) {
+  <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+} @else {
+
+<!-- ── BANNIÈRE PROFIL ───────────────────────────────────────────────────────── -->
+<div class="profile-banner mb-4">
+  <div class="profile-banner-bg"></div>
+  <div class="profile-banner-content">
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar">
+        @if (profilePicture) {
+          <img [src]="profilePicture" alt="Photo profil" class="w-100 h-100 object-fit-cover rounded-circle">
+        } @else {
+          <span class="fw-bold text-white" style="font-size:36px">{{ initials }}</span>
+        }
+      </div>
+      <label class="profile-avatar-edit" title="Changer la photo">
+        <i class="ri-camera-line"></i>
+        <input type="file" accept="image/*" class="d-none" (change)="onPhotoSelected($event)">
+      </label>
     </div>
-  </div>
-  <!-- Name -->
-  <div class="position-absolute d-flex align-items-center" style="bottom:20px;left:148px">
-    <div>
-      <h4 class="text-white fw-bold mb-0">{{ fullName }}</h4>
+    <div class="profile-banner-info">
+      <h4 class="text-white fw-bold mb-1">{{ fullName }}</h4>
       <span class="text-white opacity-75 fs-13">
-        <i class="ri-user-3-line me-1"></i>Client · {{ profile.city || 'Tunisie' }}
+        <i class="ri-user-3-line me-1"></i>Client
+        @if (fi['city'].value) { · {{ fi['city'].value }} }
       </span>
     </div>
   </div>
-  <button class="btn btn-sm position-absolute text-white fw-medium"
-          style="top:14px;right:18px;background:rgba(255,255,255,.18);border-radius:10px;
-                 border:1px solid rgba(255,255,255,.3);backdrop-filter:blur(4px)"
-          (click)="activeTab='info'; startEdit()">
-    <i class="ri-edit-line me-1"></i>Modifier
-  </button>
 </div>
 
-<!-- ── STATS ── -->
-<div class="row g-3 mb-4" style="margin-top:56px">
+<!-- ── STATISTIQUES ─────────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
   <div class="col-6 col-md-3">
     <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#405189;border-radius:12px">
-        <i class="ri-shopping-bag-3-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0">{{ ordersStats.total }}</h3>
+      <i class="ri-shopping-bag-3-line fs-24 text-primary mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.total }}</h5>
       <small class="text-muted">Commandes</small>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#0ab39c;border-radius:12px">
-        <i class="ri-check-double-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0 text-success">{{ ordersStats.delivered }}</h3>
+      <i class="ri-truck-line fs-24 text-success mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.delivered }}</h5>
       <small class="text-muted">Livrées</small>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#f7b84b;border-radius:12px">
-        <i class="ri-time-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0 text-warning">{{ ordersStats.pending }}</h3>
-      <small class="text-muted">En cours</small>
+      <i class="ri-time-line fs-24 text-warning mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.pending }}</h5>
+      <small class="text-muted">En attente</small>
     </div>
   </div>
   <div class="col-6 col-md-3">
     <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
-      <div class="mx-auto mb-2 d-flex align-items-center justify-content-center"
-           style="width:44px;height:44px;background:#f06548;border-radius:12px">
-        <i class="ri-money-dollar-circle-line text-white fs-20"></i>
-      </div>
-      <h3 class="fw-bold mb-0 text-danger">{{ ordersStats.totalSpent | number:'1.0-0' }} DT</h3>
-      <small class="text-muted">Dépensé</small>
+      <i class="ri-money-dollar-circle-line fs-24 text-info mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.totalSpent | number:'1.0-0' }} DT</h5>
+      <small class="text-muted">Total dépensé</small>
     </div>
   </div>
 </div>
 
-<!-- Alerts -->
-@if (saveSuccess) {
-  <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 rounded-3 mb-4">
-    <i class="ri-checkbox-circle-fill fs-18"></i>
-    <span>Profil mis à jour avec succès !</span>
+<!-- ── Alertes ─────────────────────────────────────────────────────────────── -->
+@if (saveMsg) {
+  <div class="alert alert-success d-flex align-items-center gap-2 py-2 mb-3">
+    <i class="ri-check-circle-line fs-18"></i>{{ saveMsg }}
   </div>
 }
-@if (pwdSuccess) {
-  <div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 rounded-3 mb-4">
-    <i class="ri-shield-check-line fs-18"></i>
-    <span>Mot de passe mis à jour avec succès !</span>
+@if (saveError) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3">
+    <i class="ri-error-warning-line fs-18"></i>{{ saveError }}
   </div>
 }
 
-<!-- ── TABS CARD ── -->
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-
-  <!-- Tab header -->
-  <div class="d-flex border-bottom px-4 pt-2 gap-1" style="background:#fafbfc">
-    <button class="btn btn-sm px-4 py-2 fw-medium border-0"
-            [style.color]="activeTab==='info' ? '#405189' : '#6c757d'"
-            [style.border-bottom]="activeTab==='info' ? '2.5px solid #405189' : '2.5px solid transparent'"
-            [style.background]="'transparent'"
-            (click)="activeTab='info'">
-      <i class="ri-user-3-line me-1"></i>Informations
-    </button>
-    <button class="btn btn-sm px-4 py-2 fw-medium border-0"
-            [style.color]="activeTab==='security' ? '#405189' : '#6c757d'"
-            [style.border-bottom]="activeTab==='security' ? '2.5px solid #405189' : '2.5px solid transparent'"
-            [style.background]="'transparent'"
-            (click)="activeTab='security'">
-      <i class="ri-lock-password-line me-1"></i>Sécurité
-    </button>
-    <button class="btn btn-sm px-4 py-2 fw-medium border-0"
-            [style.color]="activeTab==='prefs' ? '#405189' : '#6c757d'"
-            [style.border-bottom]="activeTab==='prefs' ? '2.5px solid #405189' : '2.5px solid transparent'"
-            [style.background]="'transparent'"
-            (click)="activeTab='prefs'">
-      <i class="ri-settings-3-line me-1"></i>Préférences
-    </button>
+<!-- ── ONGLETS ──────────────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm" style="border-radius:16px">
+  <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
+    <ul class="nav nav-tabs-profile gap-1">
+      <li class="nav-item">
+        <button class="nav-link-profile" [class.active]="activeTab==='info'" (click)="activeTab='info'">
+          <i class="ri-user-line me-1"></i>Mes informations
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link-profile" [class.active]="activeTab==='security'" (click)="activeTab='security'">
+          <i class="ri-lock-line me-1"></i>Sécurité
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link-profile" [class.active]="activeTab==='follows'" (click)="activeTab='follows'">
+          <i class="ri-user-follow-line me-1"></i>Vendeurs suivis
+          @if(followedVendors.length > 0) {
+            <span class="badge bg-primary-subtle text-primary ms-1">{{ followedVendors.length }}</span>
+          }
+        </button>
+      </li>
+    </ul>
   </div>
 
   <div class="card-body p-4">
 
-    <!-- ══ TAB: Informations ══ -->
+    <!-- INFOS ──────────────────────────────────────────────── -->
     @if (activeTab === 'info') {
-      @if (!editMode) {
-        <div class="row g-4">
+      <form [formGroup]="infoForm" (ngSubmit)="saveProfile()">
+        <div class="row g-3">
+          @if (isVendor) {
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">
+              <i class="ri-store-2-line me-1 text-warning"></i>Nom de l'entreprise / boutique
+            </label>
+            <input type="text" class="form-control" formControlName="shopName"
+                   placeholder="Ex: TechTunis, ModeTN...">
+          </div>
+          }
           <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Prénom</label>
-            <div class="fs-15 fw-medium">{{ profile.firstName || '—' }}</div>
+            <label class="form-label fw-semibold fs-13">Prénom <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="firstName" placeholder="Votre prénom"
+                   [class.is-invalid]="submitted && fi['firstName'].invalid">
+            @if (submitted && fi['firstName'].errors?.['required']) {
+              <div class="invalid-feedback">Prénom requis.</div>
+            }
           </div>
           <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Nom</label>
-            <div class="fs-15 fw-medium">{{ profile.lastName || '—' }}</div>
+            <label class="form-label fw-semibold fs-13">Nom <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="lastName" placeholder="Votre nom"
+                   [class.is-invalid]="submitted && fi['lastName'].invalid">
+            @if (submitted && fi['lastName'].errors?.['required']) {
+              <div class="invalid-feedback">Nom requis.</div>
+            }
           </div>
           <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Email</label>
-            <div class="fs-15 fw-medium">{{ profile.email || '—' }}</div>
+            <label class="form-label fw-semibold fs-13">Téléphone</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="ri-phone-line text-muted"></i></span>
+              <input type="tel" class="form-control" formControlName="phone" placeholder="Ex : 55123456">
+            </div>
           </div>
           <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Téléphone</label>
-            <div class="fs-15 fw-medium">{{ profile.phone || '—' }}</div>
+            <label class="form-label fw-semibold fs-13">Ville</label>
+            <select class="form-select" formControlName="city">
+              <option value="">— Sélectionner —</option>
+              @for (w of wilayas; track w) {
+                <option [value]="w">{{ w }}</option>
+              }
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">Adresse complète</label>
+            <input type="text" class="form-control" formControlName="address" placeholder="Rue, immeuble, n°...">
           </div>
           <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Ville</label>
-            <div class="fs-15 fw-medium">{{ profile.city || '—' }}</div>
+            <label class="form-label fw-semibold fs-13">
+              <i class="ri-cake-line me-1 text-muted"></i>Date de naissance
+            </label>
+            <input type="date" class="form-control" formControlName="birthDate">
           </div>
           <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Pays</label>
-            <div class="fs-15 fw-medium">{{ profile.country || '—' }}</div>
-          </div>
-          <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Adresse</label>
-            <div class="fs-15 fw-medium">{{ profile.address || '—' }}</div>
-          </div>
-          <div class="col-md-6">
-            <label class="text-muted fs-11 text-uppercase fw-semibold mb-1 d-block" style="letter-spacing:.8px">Code postal</label>
-            <div class="fs-15 fw-medium">{{ profile.postalCode || '—' }}</div>
+            <label class="form-label fw-semibold fs-13">
+              <i class="ri-user-line me-1 text-muted"></i>Genre
+            </label>
+            <select class="form-select" formControlName="gender">
+              <option value="">— Sélectionner —</option>
+              <option value="homme">Homme</option>
+              <option value="femme">Femme</option>
+              <option value="autre">Préfère ne pas préciser</option>
+            </select>
           </div>
         </div>
-        <div class="mt-4 pt-3 border-top">
-          <button class="btn btn-primary px-4 rounded-3" (click)="startEdit()">
-            <i class="ri-edit-line me-1"></i>Modifier les informations
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary px-5" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            Enregistrer les modifications
           </button>
+        </div>
+      </form>
+    }
+
+    <!-- SÉCURITÉ ─────────────────────────────────────────── -->
+    @if (activeTab === 'security') {
+      <form [formGroup]="pwdForm" (ngSubmit)="changePassword()">
+        <div class="row g-3" style="max-width:480px">
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">Mot de passe actuel <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input [type]="showCurPwd ? 'text' : 'password'" class="form-control"
+                     formControlName="currentPwd" placeholder="••••••••"
+                     [class.is-invalid]="pwdSubmit && fp['currentPwd'].invalid">
+              <button type="button" class="btn btn-outline-secondary" (click)="showCurPwd=!showCurPwd">
+                <i class="{{ showCurPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">Nouveau mot de passe <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input [type]="showNewPwd ? 'text' : 'password'" class="form-control"
+                     formControlName="newPwd" placeholder="Min. 6 caractères"
+                     [class.is-invalid]="pwdSubmit && fp['newPwd'].invalid">
+              <button type="button" class="btn btn-outline-secondary" (click)="showNewPwd=!showNewPwd">
+                <i class="{{ showNewPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">Confirmer <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input [type]="showConPwd ? 'text' : 'password'" class="form-control"
+                     formControlName="confirmPwd" placeholder="Répéter le mot de passe"
+                     [class.is-invalid]="pwdMismatch">
+              <button type="button" class="btn btn-outline-secondary" (click)="showConPwd=!showConPwd">
+                <i class="{{ showConPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
+              </button>
+            </div>
+            @if (pwdMismatch) {
+              <div class="text-danger fs-12 mt-1">Les mots de passe ne correspondent pas.</div>
+            }
+          </div>
+        </div>
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary px-5" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            Modifier le mot de passe
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- VENDEURS SUIVIS ─────────────────────────────────────── -->
+    @if (activeTab === 'follows') {
+      @if (followsLoading) {
+        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+      } @else if (followedVendors.length === 0) {
+        <div class="text-center py-5">
+          <i class="ri-user-follow-line display-3 text-muted mb-3 d-block"></i>
+          <h6 class="text-muted">Vous ne suivez aucun vendeur pour l'instant.</h6>
+          <a routerLink="/shop/products" class="btn btn-primary btn-sm mt-2">
+            <i class="ri-store-2-line me-1"></i>Découvrir la boutique
+          </a>
         </div>
       } @else {
         <div class="row g-3">
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Prénom</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="editData.firstName">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Nom</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="editData.lastName">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Email</label>
-            <input type="email" class="form-control rounded-3" [(ngModel)]="editData.email">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Téléphone</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="editData.phone">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Ville</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="editData.city">
-          </div>
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Code postal</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="editData.postalCode">
-          </div>
-          <div class="col-12">
-            <label class="form-label fw-semibold">Adresse</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="editData.address">
-          </div>
-          <div class="col-12">
-            <label class="form-label fw-semibold">Pays</label>
-            <input type="text" class="form-control rounded-3" [(ngModel)]="editData.country">
-          </div>
-        </div>
-        <div class="d-flex gap-3 mt-4 pt-3 border-top">
-          <button class="btn btn-primary px-5 rounded-3" (click)="saveProfile()">
-            <i class="ri-save-line me-1"></i>Enregistrer
-          </button>
-          <button class="btn btn-outline-secondary px-4 rounded-3" (click)="cancelEdit()">Annuler</button>
+          @for (vendor of followedVendors; track vendor.id) {
+            <div class="col-md-6 col-lg-4">
+              <div class="card border shadow-sm h-100" style="border-radius:12px">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                    @if (vendor.profile_picture) {
+                      <img [src]="vendor.profile_picture" class="rounded-circle" style="width:48px;height:48px;object-fit:cover">
+                    } @else {
+                      <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center fw-bold text-white"
+                           style="width:48px;height:48px;font-size:18px;flex-shrink:0">
+                        {{ (vendor.first_name?.[0] || '') + (vendor.last_name?.[0] || '') | uppercase }}
+                      </div>
+                    }
+                    <div class="flex-fill overflow-hidden">
+                      <h6 class="fw-bold mb-0 text-truncate">{{ vendor.shop_name || (vendor.first_name + ' ' + vendor.last_name) }}</h6>
+                      <small class="text-muted">{{ vendor.active_deals }} produit(s) actif(s)</small>
+                      @if (vendor.is_approved) {
+                        <span class="badge bg-success-subtle text-success ms-1 fs-10"><i class="ri-verified-badge-line"></i> Vérifié</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <a [routerLink]="['/shop/seller-details', vendor.id]" class="btn btn-sm btn-soft-primary flex-fill">
+                      <i class="ri-store-2-line me-1"></i>Voir boutique
+                    </a>
+                    <button class="btn btn-sm btn-soft-danger" (click)="unfollowVendor(vendor.id)" title="Se désabonner">
+                      <i class="ri-user-unfollow-line"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
         </div>
       }
     }
 
-    <!-- ══ TAB: Sécurité ══ -->
-    @if (activeTab === 'security') {
-      <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6">
-          <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-3"
-               style="background:linear-gradient(90deg,#405189,#3a4caa);color:#fff">
-            <i class="ri-shield-keyhole-line fs-24"></i>
-            <div>
-              <div class="fw-bold fs-15">Changer le mot de passe</div>
-              <div class="opacity-75 fs-12">Minimum 6 caractères recommandés</div>
-            </div>
-          </div>
-          @if (pwdError) {
-            <div class="alert alert-danger border-0 rounded-3 py-2 fs-13 mb-3">
-              <i class="ri-error-warning-line me-1"></i>{{ pwdError }}
-            </div>
-          }
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Mot de passe actuel</label>
-            <div class="input-group">
-              <input [type]="showCurrent ? 'text' : 'password'" class="form-control"
-                     [(ngModel)]="passwords.current" placeholder="••••••••">
-              <button class="btn btn-outline-secondary" type="button" (click)="showCurrent=!showCurrent">
-                <i [class]="showCurrent ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
-              </button>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label fw-semibold">Nouveau mot de passe</label>
-            <div class="input-group">
-              <input [type]="showNew ? 'text' : 'password'" class="form-control"
-                     [(ngModel)]="passwords.newPwd" placeholder="Minimum 6 caractères">
-              <button class="btn btn-outline-secondary" type="button" (click)="showNew=!showNew">
-                <i [class]="showNew ? 'ri-eye-off-line' : 'ri-eye-line'"></i>
-              </button>
-            </div>
-          </div>
-          <div class="mb-4">
-            <label class="form-label fw-semibold">Confirmer le mot de passe</label>
-            <input type="password" class="form-control rounded-3" [(ngModel)]="passwords.confirm"
-                   placeholder="Répétez le nouveau mot de passe">
-          </div>
-          <button class="btn btn-primary px-5 rounded-3 w-100" (click)="savePassword()">
-            <i class="ri-lock-password-line me-1"></i>Mettre à jour le mot de passe
-          </button>
-        </div>
-      </div>
-    }
-
-    <!-- ══ TAB: Préférences ══ -->
-    @if (activeTab === 'prefs') {
-      <h6 class="fw-bold mb-3">Notifications</h6>
-      <div class="d-flex flex-column gap-3">
-        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border">
-          <div>
-            <div class="fw-semibold fs-14">Newsletter Tijara</div>
-            <div class="text-muted fs-12">Recevoir les offres et promotions exclusives par email</div>
-          </div>
-          <div class="form-check form-switch mb-0">
-            <input class="form-check-input" type="checkbox" role="switch"
-                   [(ngModel)]="profile.newsletter" style="width:44px;height:22px;cursor:pointer">
-          </div>
-        </div>
-        <div class="d-flex align-items-center justify-content-between p-3 rounded-3 border">
-          <div>
-            <div class="fw-semibold fs-14">Notifications commandes</div>
-            <div class="text-muted fs-12">Alertes de suivi et confirmation de livraison</div>
-          </div>
-          <div class="form-check form-switch mb-0">
-            <input class="form-check-input" type="checkbox" role="switch"
-                   [(ngModel)]="profile.notifications" style="width:44px;height:22px;cursor:pointer">
-          </div>
-        </div>
-      </div>
-      <div class="mt-4">
-        <button class="btn btn-primary px-4 rounded-3">
-          <i class="ri-save-line me-1"></i>Enregistrer les préférences
-        </button>
-      </div>
-    }
-
   </div>
 </div>
+
+} <!-- end @if loading -->
+
+<style>
+.profile-banner { position:relative;border-radius:20px;overflow:hidden;height:180px; }
+.profile-banner-bg { position:absolute;inset:0;background:linear-gradient(135deg,#405189 0%,#0ab39c 100%); }
+.profile-banner-content { position:absolute;inset:0;display:flex;align-items:flex-end;gap:20px;padding:0 28px 24px; }
+.profile-avatar-wrap { position:relative;flex-shrink:0; }
+.profile-avatar {
+  width:88px;height:88px;border-radius:50%;border:3px solid #fff;
+  background:linear-gradient(135deg,#405189,#0ab39c);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.profile-avatar-edit {
+  position:absolute;bottom:0;right:0;width:26px;height:26px;
+  background:#fff;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2);
+  font-size:13px;color:#405189;
+}
+.profile-banner-info { padding-bottom:4px; }
+.nav-tabs-profile { display:flex; border-bottom:2px solid #e9ecef; padding:0; list-style:none; margin:0; gap:4px; }
+.nav-link-profile {
+  border:none; border-bottom:2px solid transparent; border-radius:0;
+  padding:.6rem 1.2rem; color:#74788d; background:transparent;
+  cursor:pointer; font-size:13px; font-weight:500; margin-bottom:-2px;
+  transition:all .2s;
+}
+.nav-link-profile.active { color:#405189; border-bottom-color:#405189; }
+.nav-link-profile:hover:not(.active) { color:#405189; background:#f8f9fa; }
+</style>

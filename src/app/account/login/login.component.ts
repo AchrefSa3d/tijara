@@ -1,10 +1,11 @@
 import { Component, OnInit, AfterViewInit, NgZone } from '@angular/core';
 import { UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 import { environment } from 'src/environments/environment';
 
 declare const google: any;
+declare const FB: any;
 
 @Component({
     selector: 'app-login',
@@ -15,33 +16,35 @@ declare const google: any;
 export class LoginComponent implements OnInit, AfterViewInit {
 
     loginForm!: UntypedFormGroup;
-    submitted     = false;
-    loading       = false;
-    error         = '';
-    fieldTextType = false;
-    year          = new Date().getFullYear();
+    submitted       = false;
+    loading         = false;
+    error           = '';
+    success         = '';
+    fieldTextType   = false;
+    year            = new Date().getFullYear();
 
-    // Comptes démo affichés dans le template
     demoUsers = [
-        { email: 'admin@tijara.tn',  password: 'admin123',    role: 'admin'  },
-        { email: 'vendor@tijara.tn', password: 'password',    role: 'vendor' },
-        { email: 'user@tijara.tn',   password: 'password123', role: 'user'   },
+        { email: 'admin@tijara.tn',  password: 'admin123',  role: 'admin'  },
+        { email: 'vendor@tijara.tn', password: 'vendor123', role: 'vendor' },
+        { email: 'user@tijara.tn',   password: 'user123',   role: 'user'   },
     ];
 
-    googleLoading = false;
+    googleLoading    = false;
+    facebookLoading  = false;
+    googleConfigured = false;  // true uniquement si clientId réel configuré
 
     constructor(
         private fb: UntypedFormBuilder,
         private router: Router,
+        private route: ActivatedRoute,
         private api: TijaraApiService,
         private ngZone: NgZone,
     ) {
-        // Si déjà connecté, rediriger directement
         try {
             const raw = localStorage.getItem('currentUser');
             if (raw) {
                 const user = JSON.parse(raw);
-                if (user?.role) { this.redirectByRole(user.role); }
+                if (user?.role) this.redirectByRole(user.role);
             }
         } catch {
             localStorage.removeItem('currentUser');
@@ -53,25 +56,40 @@ export class LoginComponent implements OnInit, AfterViewInit {
             email:    ['', [Validators.required, Validators.email]],
             password: ['', Validators.required],
         });
+        this.route.queryParams.subscribe(p => {
+            if (p['confirmed'] === '1')
+                this.success = '✅ Email confirmé avec succès ! Vous pouvez maintenant vous connecter.';
+        });
     }
 
     ngAfterViewInit(): void {
         this.initGoogleSignIn();
     }
 
+    // ── Google Sign-In ────────────────────────────────────────────────
+
     initGoogleSignIn(): void {
+        const clientId = environment.googleClientId || '';
+        // Ne pas initialiser GIS si l'ID est un placeholder
+        if (!clientId || clientId.includes('YOUR_GOOGLE') || clientId === '') {
+            this.googleConfigured = false;
+            return;
+        }
         try {
             google.accounts.id.initialize({
-                client_id: environment.googleClientId,
+                client_id: clientId,
                 callback: (response: any) => {
                     this.ngZone.run(() => this.handleGoogleCredential(response.credential));
                 }
             });
             google.accounts.id.renderButton(
                 document.getElementById('google-btn-login'),
-                { theme: 'outline', size: 'large', width: 320, text: 'signin_with', logo_alignment: 'left' }
+                { theme: 'outline', size: 'large', width: 340, text: 'signin_with', logo_alignment: 'left' }
             );
-        } catch (e) {}
+            this.googleConfigured = true;
+        } catch (e) {
+            this.googleConfigured = false;
+        }
     }
 
     handleGoogleCredential(credential: string): void {
@@ -80,16 +98,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.api.googleLogin(credential).subscribe({
             next: (res: any) => {
                 this.googleLoading = false;
-                const currentUser = {
-                    token:     res.token,
-                    id:        res.user.id,
-                    email:     res.user.email,
-                    role:      res.user.role,
-                    firstName: res.user.firstName,
-                    lastName:  res.user.lastName,
-                    phone:     res.user.phone,
-                    city:      res.user.city,
-                };
+                const currentUser = this.buildCurrentUser(res);
                 localStorage.setItem('toast', 'true');
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 this.redirectByRole(currentUser.role);
@@ -101,6 +110,120 @@ export class LoginComponent implements OnInit, AfterViewInit {
         });
     }
 
+    /** Demo : connexion Google simulée (sans vrai OAuth) */
+    loginDemoGoogle(): void {
+        this.googleLoading = true;
+        setTimeout(() => {
+            this.googleLoading = false;
+            const currentUser = {
+                token:          'demo_google_token',
+                id:             9001,
+                email:          'demo.google@tijara.tn',
+                role:           'user',
+                firstName:      'Demo Google',
+                lastName:       '',
+                shopName:       '',
+                phone:          '',
+                city:           '',
+                address:        '',
+                country:        'Tunisie',
+                profilePicture: '',
+                isApproved:     true,
+            };
+            localStorage.setItem('toast', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            this.redirectByRole('user');
+        }, 800);
+    }
+
+    // ── Facebook Login ────────────────────────────────────────────────
+
+    facebookLogin(): void {
+        // Vérifier si l'App ID Facebook est valide (pas '0' ou vide)
+        const fbAppId = environment.facebookAppId || '0';
+        if (!fbAppId || fbAppId === '0' || fbAppId === '') {
+            this.loginDemoFacebook();
+            return;
+        }
+
+        this.facebookLoading = true;
+        this.error = '';
+        try {
+            FB.login((loginResp: any) => {
+                if (loginResp.authResponse?.accessToken) {
+                    const token = loginResp.authResponse.accessToken;
+                    this.api.facebookLogin(token).subscribe({
+                        next: (res: any) => {
+                            this.ngZone.run(() => {
+                                this.facebookLoading = false;
+                                const currentUser = this.buildCurrentUser(res);
+                                localStorage.setItem('toast', 'true');
+                                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                                this.redirectByRole(currentUser.role);
+                            });
+                        },
+                        error: (err: any) => {
+                            this.ngZone.run(() => {
+                                this.facebookLoading = false;
+                                this.error = err?.error?.message || 'Connexion Facebook échouée.';
+                            });
+                        }
+                    });
+                } else {
+                    this.ngZone.run(() => {
+                        this.facebookLoading = false;
+                        if (loginResp.status !== 'unknown') {
+                            this.error = 'Connexion Facebook annulée.';
+                        }
+                    });
+                }
+            }, { scope: 'public_profile,email' });
+        } catch {
+            this.facebookLoading = false;
+            this.loginDemoFacebook();
+        }
+    }
+
+    /** Demo : connexion Facebook simulée (sans vrai App ID) */
+    private loginDemoFacebook(): void {
+        this.facebookLoading = true;
+        setTimeout(() => {
+            this.facebookLoading = false;
+            const currentUser = {
+                token:          'demo_facebook_token',
+                id:             9002,
+                email:          'demo.facebook@tijara.tn',
+                role:           'user',
+                firstName:      'Demo Facebook',
+                lastName:       '',
+                shopName:       '',
+                phone:          '',
+                city:           '',
+                address:        '',
+                country:        'Tunisie',
+                profilePicture: '',
+                isApproved:     true,
+            };
+            localStorage.setItem('toast', 'true');
+            localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            this.redirectByRole('user');
+        }, 800);
+    }
+
+    private getFBAppId(): string {
+        try {
+            // Lire l'App ID depuis le script FB déjà initialisé
+            const match = document.cookie.match(/fblo_(\d+)/);
+            if (match) return match[1];
+            // Fallback : lire depuis le SDK
+            return (window as any).FB?.AppID?.toString() || '0';
+        } catch {
+            return '0';
+        }
+    }
+
+    // ── Formulaire e-mail ─────────────────────────────────────────────
+
     get f() { return this.loginForm.controls; }
 
     toggleFieldTextType(): void { this.fieldTextType = !this.fieldTextType; }
@@ -111,7 +234,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
 
     onSubmit(): void {
         this.submitted = true;
-        this.error = '';
+        this.error     = '';
         if (this.loginForm.invalid) return;
 
         this.loading = true;
@@ -121,17 +244,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
         this.api.login(email, password).subscribe({
             next: (res: any) => {
                 this.loading = false;
-                // Sauvegarder token + infos utilisateur
-                const currentUser = {
-                    token:     res.token,
-                    id:        res.user.id,
-                    email:     res.user.email,
-                    role:      res.user.role,
-                    firstName: res.user.firstName,
-                    lastName:  res.user.lastName,
-                    phone:     res.user.phone,
-                    city:      res.user.city,
-                };
+                const currentUser = this.buildCurrentUser(res);
                 localStorage.setItem('toast', 'true');
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
                 this.redirectByRole(currentUser.role);
@@ -147,9 +260,27 @@ export class LoginComponent implements OnInit, AfterViewInit {
         });
     }
 
+    private buildCurrentUser(res: any) {
+        return {
+            token:          res.token,
+            id:             res.user.id,
+            email:          res.user.email,
+            role:           res.user.role,
+            firstName:      res.user.first_name  || '',
+            lastName:       res.user.last_name   || '',
+            shopName:       res.user.shop_name   || '',
+            phone:          res.user.phone       || '',
+            city:           res.user.city        || '',
+            address:        res.user.address     || '',
+            country:        res.user.country     || 'Tunisie',
+            profilePicture: res.user.profile_picture || '',
+            isApproved:     res.user.is_approved,
+        };
+    }
+
     private redirectByRole(role: string): void {
-        if (role === 'admin')        this.router.navigate(['/admin/reclamations']);
-        else if (role === 'vendor')  this.router.navigate(['/ent/dashboard']);
-        else                         this.router.navigate(['/users/dashboard']);
+        if (role === 'admin')       this.router.navigate(['/admin/reclamations']);
+        else if (role === 'vendor') this.router.navigate(['/ent/dashboard']);
+        else                        this.router.navigate(['/users/dashboard']);
     }
 }

@@ -137,8 +137,8 @@
         <div class="card border-0 shadow-sm rounded-4 overflow-hidden"
              style="cursor:pointer;transition:box-shadow .2s"
              (click)="showDetail(o)"
-             (mouseenter)="$event.currentTarget.style.boxShadow='0 4px 20px rgba(0,0,0,.1)'"
-             (mouseleave)="$event.currentTarget.style.boxShadow=''">
+             (mouseenter)="$any($event.currentTarget).style.boxShadow='0 4px 20px rgba(0,0,0,.1)'"
+             (mouseleave)="$any($event.currentTarget).style.boxShadow=''">
           <div class="card-body p-4">
             <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
               <!-- Icône + infos -->

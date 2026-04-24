@@ -32,13 +32,16 @@ export class OrdersAdminComponent implements OnInit {
       next: (data: any[]) => {
         this.allOrders = data.map(o => ({
           id:      o.id,
-          client:  o.client_name || o.client_email || 'Client',
-          email:   o.client_email || '',
-          phone:   o.client_phone || '',
+          client:  o.client_name || o.email || 'Client',
+          email:   o.email       || '',
+          phone:   '',
           ville:   o.shipping_address || '—',
-          total:   o.total_amount || 0,
-          date:    new Date(o.created_at).toLocaleDateString('fr-FR'),
-          status:  this.mapStatus(o.status),
+          vendor:  o.vendor      || '—',
+          product: o.product     || '—',
+          items:   1,
+          total:   this.parsePrice(o.total),
+          date:    o.date        || '—',
+          status:  o.status      || 'En attente',
           apiId:   o.id,
         }));
         this.loading = false;
@@ -46,6 +49,12 @@ export class OrdersAdminComponent implements OnInit {
       },
       error: () => { this.loading = false; }
     });
+  }
+
+  private parsePrice(s: any): number {
+    if (!s || s === '—') return 0;
+    const m = String(s).match(/[\d.,]+/);
+    return m ? parseFloat(m[0].replace(',', '.')) : 0;
   }
 
   private mapStatus(s: string): string {
@@ -79,9 +88,12 @@ export class OrdersAdminComponent implements OnInit {
   }
 
   changeStatus(order: any, status: string) {
+    const prev = order.status;
     order.status = status;
-    this.api.updateAdminOrderStatus(order.apiId, this.statusToApi(status)).subscribe();
     this.applyFilter();
+    this.api.updateAdminOrderStatus(order.apiId, this.statusToApi(status)).subscribe({
+      error: () => { order.status = prev; this.applyFilter(); }
+    });
   }
 
   getStatusClass(status: string): string {

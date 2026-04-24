@@ -18,6 +18,18 @@ import { AnnoncesAdminComponent }     from './annonces-admin/annonces-admin.comp
 import { ProductsAdminComponent }     from './products-admin/products-admin.component';
 import { VendorDetailAdminComponent } from './vendor-detail-admin/vendor-detail-admin.component';
 import { UserDetailAdminComponent }   from './user-detail-admin/user-detail-admin.component';
+import { IaDashboardComponent }       from './ia-dashboard/ia-dashboard.component';
+import { SettingsAdminComponent }     from './settings-admin/settings-admin.component';
+import { AdminCrudComponent }         from './crud-generic/admin-crud.component';
+import { BrandsAdminComponent }       from './brands-admin/brands-admin.component';
+import { CountriesAdminComponent }    from './countries-admin/countries-admin.component';
+import { CitiesAdminComponent }       from './cities-admin/cities-admin.component';
+import { CausesAdminComponent }       from './causes-admin/causes-admin.component';
+import { CouponsAdminComponent }      from './coupons-admin/coupons-admin.component';
+import { PrizesAdminComponent }       from './prizes-admin/prizes-admin.component';
+import { BoostPacksAdminComponent }   from './boost-packs-admin/boost-packs-admin.component';
+import { WinnersAdminComponent }      from './winners-admin/winners-admin.component';
+import { DealsAdminComponent }        from './deals-admin/deals-admin.component';
 
 const routes: Routes = [
   { path: '',                   redirectTo: 'dashboard', pathMatch: 'full' },
@@ -30,6 +42,17 @@ const routes: Routes = [
   { path: 'vendor-detail/:id',  component: VendorDetailAdminComponent },
   { path: 'annonces',           component: AnnoncesAdminComponent },
   { path: 'products',           component: ProductsAdminComponent },
+  { path: 'ia',                 component: IaDashboardComponent },
+  { path: 'settings',           component: SettingsAdminComponent },
+  { path: 'brands',             component: BrandsAdminComponent },
+  { path: 'countries',          component: CountriesAdminComponent },
+  { path: 'cities',             component: CitiesAdminComponent },
+  { path: 'causes',             component: CausesAdminComponent },
+  { path: 'coupons',            component: CouponsAdminComponent },
+  { path: 'prizes',             component: PrizesAdminComponent },
+  { path: 'boost-packs',        component: BoostPacksAdminComponent },
+  { path: 'winners',            component: WinnersAdminComponent    },
+  { path: 'deals',              component: DealsAdminComponent      },
   {
     path: 'reclamations',
     loadChildren: () => import('./reclamations/reclamations.module').then(m => m.ReclamationsModule),
@@ -47,6 +70,18 @@ const routes: Routes = [
     ProductsAdminComponent,
     VendorDetailAdminComponent,
     UserDetailAdminComponent,
+    IaDashboardComponent,
+    SettingsAdminComponent,
+    AdminCrudComponent,
+    BrandsAdminComponent,
+    CountriesAdminComponent,
+    CitiesAdminComponent,
+    CausesAdminComponent,
+    CouponsAdminComponent,
+    PrizesAdminComponent,
+    BoostPacksAdminComponent,
+    WinnersAdminComponent,
+    DealsAdminComponent,
   ],
   imports: [
     CommonModule,

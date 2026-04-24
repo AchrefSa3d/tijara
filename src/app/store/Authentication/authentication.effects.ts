@@ -33,9 +33,9 @@ export class AuthenticationEffects {
         return this.AuthenticationService.login(email, password).pipe(
           map((user) => {
             if (user.status === 'success') {
-              sessionStorage.setItem('toast', 'true');
-              sessionStorage.setItem('currentUser', JSON.stringify(user.data));
-              sessionStorage.setItem('token', user.token);
+              localStorage.setItem('toast', 'true');
+              localStorage.setItem('currentUser', JSON.stringify(user.data));
+              localStorage.setItem('token', user.token);
               // Redirection selon le rôle
               const role = user.data?.role;
               if (role === 'admin') {

@@ -5,6 +5,7 @@ import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 import { environment } from 'src/environments/environment';
 
 declare const google: any;
+declare const FB: any;
 
 @Component({
     selector: 'app-register',
@@ -15,13 +16,16 @@ declare const google: any;
 export class RegisterComponent implements OnInit, AfterViewInit {
 
     signupForm!: UntypedFormGroup;
-    submitted       = false;
-    loading         = false;
-    googleLoading   = false;
-    error           = '';
-    fieldTextType   = false;
-    pendingApproval = false;
-    year: number    = new Date().getFullYear();
+    submitted        = false;
+    loading          = false;
+    googleLoading    = false;
+    facebookLoading  = false;
+    error            = '';
+    fieldTextType    = false;
+    pendingApproval  = false;
+    emailSent        = false;   // confirmation email sent
+    registeredEmail  = '';
+    year: number     = new Date().getFullYear();
 
     constructor(
         private fb: UntypedFormBuilder,
@@ -41,6 +45,8 @@ export class RegisterComponent implements OnInit, AfterViewInit {
             companyNumber: [''],
             email:         ['', [Validators.required, Validators.email]],
             password:      ['', [Validators.required, Validators.minLength(6)]],
+            birthDate:     [''],   // date de naissance (client uniquement)
+            gender:        [''],   // genre (client uniquement)
         });
     }
 
@@ -74,8 +80,9 @@ export class RegisterComponent implements OnInit, AfterViewInit {
                     id:        res.user.id,
                     email:     res.user.email,
                     role:      res.user.role,
-                    firstName: res.user.firstName,
-                    lastName:  res.user.lastName,
+                    firstName: res.user.first_name,
+                    lastName:  res.user.last_name,
+                    shopName:  res.user.shop_name || '',
                 };
                 localStorage.setItem('toast', 'true');
                 localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -103,6 +110,49 @@ export class RegisterComponent implements OnInit, AfterViewInit {
 
     toggleFieldTextType() { this.fieldTextType = !this.fieldTextType; }
 
+    facebookLogin(): void {
+        this.facebookLoading = true;
+        this.error = '';
+        try {
+            FB.login((loginResp: any) => {
+                if (loginResp.authResponse?.accessToken) {
+                    const token = loginResp.authResponse.accessToken;
+                    this.api.facebookLogin(token).subscribe({
+                        next: (res: any) => {
+                            this.ngZone.run(() => {
+                                this.facebookLoading = false;
+                                const currentUser = {
+                                    token:          res.token,
+                                    id:             res.user.id,
+                                    email:          res.user.email,
+                                    role:           res.user.role || 'user',
+                                    firstName:      res.user.first_name || '',
+                                    lastName:       res.user.last_name  || '',
+                                    shopName:       res.user.shop_name  || '',
+                                    profilePicture: res.user.profile_picture || '',
+                                };
+                                localStorage.setItem('toast', 'true');
+                                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                                this.router.navigate(['/users/dashboard']);
+                            });
+                        },
+                        error: (err: any) => {
+                            this.ngZone.run(() => {
+                                this.facebookLoading = false;
+                                this.error = err?.error?.message || 'Connexion Facebook échouée.';
+                            });
+                        }
+                    });
+                } else {
+                    this.ngZone.run(() => { this.facebookLoading = false; });
+                }
+            }, { scope: 'public_profile,email' });
+        } catch {
+            this.facebookLoading = false;
+            this.error = 'Facebook SDK non disponible.';
+        }
+    }
+
     onSubmit() {
         this.submitted = true;
         this.error = '';
@@ -111,27 +161,48 @@ export class RegisterComponent implements OnInit, AfterViewInit {
         this.loading = true;
 
         this.api.register({
-            firstName:     this.f['firstName'].value.trim(),
-            lastName:      this.f['lastName'].value.trim(),
-            email:         this.f['email'].value.trim().toLowerCase(),
-            phone:         this.f['phone'].value.trim(),
-            city:          this.f['city'].value.trim(),
-            password:      this.f['password'].value,
-            role:          this.f['role'].value,
-            shopName:      this.f['shopName'].value.trim(),
-            companyNumber: this.f['companyNumber'].value.trim(),
+            first_name:     this.f['firstName'].value.trim(),
+            last_name:      this.f['lastName'].value.trim(),
+            email:          this.f['email'].value.trim().toLowerCase(),
+            phone:          this.f['phone'].value?.trim() || '',
+            city:           this.f['city'].value?.trim() || '',
+            password:       this.f['password'].value,
+            role:           this.f['role'].value,
+            shop_name:      this.f['shopName'].value?.trim() || '',
+            company_number: this.f['companyNumber'].value?.trim() || '',
+            birth_date:     this.f['birthDate'].value || null,
+            gender:         this.f['gender'].value   || null,
         }).subscribe({
             next: (res: any) => {
                 this.loading = false;
                 if (res.status === 'pending_approval') {
+                    // Vendeur → attente validation
                     this.pendingApproval = true;
+                } else if (res.email_sent) {
+                    // Client → email de confirmation envoyé
+                    this.emailSent       = true;
+                    this.registeredEmail = this.f['email'].value.trim().toLowerCase();
+                } else if (res.token) {
+                    // Client → connexion directe (sans confirmation)
+                    const currentUser = {
+                        token:     res.token,
+                        id:        res.user?.id,
+                        email:     res.user?.email,
+                        role:      res.user?.role || 'user',
+                        firstName: res.user?.first_name || '',
+                        lastName:  res.user?.last_name  || '',
+                        shopName:  res.user?.shop_name  || '',
+                    };
+                    localStorage.setItem('toast',       'true');
+                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                    this.router.navigate(['/users/dashboard']);
                 } else {
                     this.router.navigate(['/auth/login']);
                 }
             },
             error: (err: any) => {
                 this.loading = false;
-                this.error = err?.error?.message || 'Erreur lors de l\'inscription';
+                this.error = err?.error?.message || 'Erreur lors de l\'inscription. Vérifiez vos données.';
             }
         });
     }

@@ -30,7 +30,14 @@
           }
         </div>
       </div>
-      <div class="d-flex gap-2">
+      <div class="d-flex gap-2 flex-wrap">
+        <button class="btn btn-sm" [disabled]="followLoading"
+                [class.btn-success]="isFollowing"
+                [class.btn-outline-success]="!isFollowing"
+                (click)="toggleFollow()">
+          <i class="me-1" [class.ri-user-unfollow-line]="isFollowing" [class.ri-user-follow-line]="!isFollowing"></i>
+          {{ isFollowing ? 'Suivi ✓' : 'Suivre' }}
+        </button>
         <button class="btn btn-primary btn-sm" (click)="showContactForm=!showContactForm">
           <i class="ri-chat-3-line me-1"></i>Contacter
         </button>

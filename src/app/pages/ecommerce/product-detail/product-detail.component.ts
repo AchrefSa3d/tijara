@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
+import { IaApiService } from 'src/app/core/services/ia-api.service';
 import { Product } from '../products/products.component';
 
 @Component({
@@ -23,7 +24,10 @@ export class ProductDetailComponent implements OnInit {
   activeTab = 'description';
   cartItems: { product: any; qty: number }[] = [];
   addedToCart = false;
-  relatedProducts: any[] = [];
+  relatedProducts: any[]  = [];
+  similarProducts: any[]  = [];
+  aiScore: any            = null;
+  loadingSimilar          = false;
 
   // Reviews
   reviews: any[]   = [];
@@ -39,11 +43,19 @@ export class ProductDetailComponent implements OnInit {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private api: TijaraApiService
+    private api: TijaraApiService,
+    private ia: IaApiService
   ) {}
 
+  private get cartKey(): string {
+    try {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      return u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
+    } catch { return 'tijara_cart_guest'; }
+  }
+
   ngOnInit(): void {
-    const saved = localStorage.getItem('tijara_cart');
+    const saved = localStorage.getItem(this.cartKey);
     this.cartItems = saved ? JSON.parse(saved) : [];
 
     const raw = localStorage.getItem('currentUser');
@@ -71,6 +83,8 @@ export class ProductDetailComponent implements OnInit {
         this.loading = false;
         this.addedToCart = this.cartItems.some(i => i.product.id === id);
         this.loadReviews(id);
+        this.loadSimilarProducts(id);
+        this.loadAiScore(id);
       },
       error: () => { this.loading = false; }
     });
@@ -89,6 +103,38 @@ export class ProductDetailComponent implements OnInit {
       },
       error: () => { this.reviewsLoading = false; }
     });
+  }
+
+  loadSimilarProducts(productId: number): void {
+    this.loadingSimilar = true;
+    this.ia.getSimilarProducts(productId).subscribe({
+      next: (res: any) => {
+        this.similarProducts = (res.similar || []).slice(0, 4);
+        this.loadingSimilar  = false;
+      },
+      error: () => { this.loadingSimilar = false; }
+    });
+  }
+
+  loadAiScore(productId: number): void {
+    this.ia.getPrediction(productId).subscribe({
+      next: (res: any) => { this.aiScore = res; },
+      error: () => {}
+    });
+  }
+
+  get aiScoreClass(): string {
+    const s = this.aiScore?.success_score || 0;
+    if (s >= 70) return 'text-success';
+    if (s >= 40) return 'text-warning';
+    return 'text-danger';
+  }
+
+  get aiScoreBg(): string {
+    const s = this.aiScore?.success_score || 0;
+    if (s >= 70) return 'bg-success';
+    if (s >= 40) return 'bg-warning';
+    return 'bg-danger';
   }
 
   submitReview(): void {
@@ -131,7 +177,7 @@ export class ProductDetailComponent implements OnInit {
     if (!this.product) return;
     const existing = this.cartItems.find(i => i.product.id === this.product.id);
     if (existing) { existing.qty += this.quantity; } else { this.cartItems.push({ product: this.product, qty: this.quantity }); }
-    localStorage.setItem('tijara_cart', JSON.stringify(this.cartItems));
+    localStorage.setItem(this.cartKey, JSON.stringify(this.cartItems));
     this.addedToCart = true;
   }
 

@@ -81,17 +81,17 @@ export class DashboardAdminComponent implements OnInit {
         this.kpis[2].value = s.orders           || 0;
         this.kpis[3].value = s.revenue          || 0;
         this.kpis[4].value = s.products         || 0;
-        this.kpis[5].value = s.openReclamations || 0;
+        this.kpis[5].value = s.open_reclamations || 0;
 
-        this.pendingBadges[0].value = s.pendingVendors  || 0;
-        this.pendingBadges[1].value = s.pendingProducts || 0;
-        this.pendingBadges[2].value = s.pendingAnnonces || 0;
+        this.pendingBadges[0].value = s.pending_vendors  || 0;
+        this.pendingBadges[1].value = s.pending_products || 0;
+        this.pendingBadges[2].value = s.pending_annonces || 0;
 
-        if (s.ordersByMonth) {
-          this.salesSeries = [{ name: 'Commandes', data: s.ordersByMonth }];
+        if (s.orders_by_month) {
+          this.salesSeries = [{ name: 'Commandes', data: s.orders_by_month }];
         }
-        if (s.ordersByStatus) {
-          const st = s.ordersByStatus;
+        if (s.orders_by_status) {
+          const st = s.orders_by_status;
           this.catSeries = [
             st['pending']   || 0,
             st['confirmed'] || 0,

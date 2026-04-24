@@ -15,95 +15,203 @@ export class ProfileEntComponent implements OnInit {
     { label: 'Mon Profil', active: true }
   ];
 
-  profileForm!: FormGroup;
-  passwordForm!: FormGroup;
-  submitted = false;
-  pwdSubmitted = false;
-  saveSuccess = false;
-  pwdSuccess = false;
-  showPwd = false;
-  showNewPwd = false;
-  activeTab = 'infos';
+  activeTab: 'infos' | 'boutique' | 'securite' = 'infos';
+  infoForm!: FormGroup;
+  shopForm!: FormGroup;
+  pwdForm!: FormGroup;
+
+  submitted    = false;
+  shopSubmit   = false;
+  pwdSubmit    = false;
+  saving       = false;
+  saveMsg      = '';
+  saveError    = '';
+  showCurrentPwd = false;
+  showNewPwd     = false;
+  showConfirmPwd = false;
+  loading        = true;
+
+  profilePicture = '';
+  uploading      = false;
 
   wilayas = [
-    'Tunis', 'Ariana', 'Ben Arous', 'Manouba', 'Nabeul', 'Sousse', 'Sfax',
-    'Monastir', 'Mahdia', 'Kairouan', 'Bizerte', 'Béja', 'Jendouba',
-    'Gabès', 'Médenine', 'Gafsa', 'Tozeur', 'Kébili', 'Tataouine', 'Kasserine'
-  ];
-
-  categories = ['Électronique', 'Mode', 'Maison', 'Sport', 'Beauté', 'Jouets', 'Alimentation', 'Autre'];
-
-  stats = [
-    { label: 'Produits en ligne', value: 12,        icon: 'ri-box-3-line',          color: 'primary' },
-    { label: 'Commandes totales', value: 48,         icon: 'ri-shopping-bag-3-line', color: 'success' },
-    { label: 'Note moyenne',      value: '4.7 / 5',  icon: 'ri-star-fill',           color: 'warning' },
-    { label: 'Membre depuis',     value: 'Jan 2026', icon: 'ri-calendar-check-line', color: 'info'    },
+    'Tunis','Ariana','Ben Arous','Manouba','Nabeul','Sousse','Sfax',
+    'Monastir','Mahdia','Kairouan','Bizerte','Béja','Jendouba',
+    'Gabès','Médenine','Gafsa','Tozeur','Kébili','Tataouine','Kasserine','Hammamet'
   ];
 
   constructor(private fb: FormBuilder, private api: TijaraApiService) {}
 
   ngOnInit(): void {
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
+    this.buildForms();
+    this.loadProfile();
+  }
 
-    this.profileForm = this.fb.group({
-      firstName:   [user.firstName || user.first_name || '',  [Validators.required]],
-      lastName:    [user.lastName  || user.last_name  || '',  [Validators.required]],
-      email:       [user.email     || '',  [Validators.required, Validators.email]],
-      phone:       [user.phone     || '',  [Validators.required, Validators.pattern(/^[2459]\d{7}$/)]],
-      shopName:    ['', [Validators.required, Validators.minLength(3)]],
-      category:    ['', Validators.required],
-      wilaya:      [user.city || '', Validators.required],
-      description: [''],
-      website:     [''],
+  buildForms() {
+    this.infoForm = this.fb.group({
+      firstName: ['', [Validators.required, Validators.minLength(2)]],
+      lastName:  ['', [Validators.required, Validators.minLength(2)]],
+      phone:     [''],  // optional – validated only if non-empty in template
+      city:      [''],
+      address:   [''],
     });
-
-    // Charger depuis le vrai backend
-    this.api.getMe().subscribe({
-      next: (u: any) => {
-        this.profileForm.patchValue({
-          firstName: u.first_name || u.firstName || '',
-          lastName:  u.last_name  || u.lastName  || '',
-          email:     u.email || '',
-          phone:     u.phone || '',
-          wilaya:    u.city  || '',
-        });
-      }
+    this.shopForm = this.fb.group({
+      shopName:      ['', [Validators.required, Validators.minLength(3)]],
+      companyNumber: [''],
     });
-
-    this.passwordForm = this.fb.group({
+    this.pwdForm = this.fb.group({
       currentPwd: ['', Validators.required],
       newPwd:     ['', [Validators.required, Validators.minLength(6)]],
       confirmPwd: ['', Validators.required],
     });
   }
 
-  get f()  { return this.profileForm.controls; }
-  get fp() { return this.passwordForm.controls; }
+  loadProfile() {
+    this.loading = true;
+    this.api.getMe().subscribe({
+      next: (u: any) => {
+        this.profilePicture = u.profile_picture || '';
+        this.infoForm.patchValue({
+          firstName: u.first_name || '',
+          lastName:  u.last_name  || '',
+          phone:     u.phone      || '',
+          city:      u.city       || '',
+          address:   u.address    || '',
+        });
+        this.shopForm.patchValue({
+          shopName:      u.shop_name       || '',
+          companyNumber: u.company_number  || '',
+        });
+        this.loading = false;
+      },
+      error: () => { this.loading = false; }
+    });
+  }
 
-  saveProfile() {
+  get fi() { return this.infoForm.controls; }
+  get fs() { return this.shopForm.controls; }
+  get fp() { return this.pwdForm.controls; }
+
+  get initials(): string {
+    const fn = this.fi['firstName'].value || '';
+    const ln = this.fi['lastName'].value  || '';
+    return `${fn[0] || ''}${ln[0] || ''}`.toUpperCase() || 'V';
+  }
+
+  onPhotoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    if (file.size > 2 * 1024 * 1024) { alert('Image trop grande (max 2MB).'); return; }
+    const reader = new FileReader();
+    reader.onload = (e: any) => {
+      this.profilePicture = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  saveInfos() {
     this.submitted = true;
-    if (this.profileForm.invalid) return;
-    // Mise à jour localStorage
-    const user = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const updated = { ...user, ...this.profileForm.value };
-    localStorage.setItem('currentUser', JSON.stringify(updated));
-    this.saveSuccess = true;
-    setTimeout(() => this.saveSuccess = false, 3000);
-    this.submitted = false;
+    if (this.infoForm.invalid) return;
+    this.saving    = true;
+    this.saveMsg   = '';
+    this.saveError = '';
+
+    const v = this.infoForm.value;
+    this.api.updateProfile({
+      first_name:      v.firstName,
+      last_name:       v.lastName,
+      phone:           v.phone,
+      city:            v.city,
+      address:         v.address,
+      profile_picture: this.profilePicture || null,
+    }).subscribe({
+      next: (res: any) => {
+        this.saving  = false;
+        this.saveMsg = 'Informations mises à jour avec succès.';
+        this.updateLocalStorage(res.user);
+        this.submitted = false;
+        setTimeout(() => this.saveMsg = '', 4000);
+      },
+      error: (err: any) => {
+        this.saving    = false;
+        this.saveError = err?.error?.message || 'Erreur lors de la sauvegarde.';
+      }
+    });
+  }
+
+  saveBoutique() {
+    this.shopSubmit = true;
+    if (this.shopForm.invalid) return;
+    this.saving    = true;
+    this.saveMsg   = '';
+    this.saveError = '';
+
+    const v = this.shopForm.value;
+    this.api.updateProfile({
+      shop_name:      v.shopName,
+      company_number: v.companyNumber,
+    }).subscribe({
+      next: (res: any) => {
+        this.saving     = false;
+        this.saveMsg    = 'Informations boutique mises à jour.';
+        this.shopSubmit = false;
+        this.updateLocalStorage(res.user);
+        setTimeout(() => this.saveMsg = '', 4000);
+      },
+      error: (err: any) => {
+        this.saving    = false;
+        this.saveError = err?.error?.message || 'Erreur.';
+      }
+    });
   }
 
   changePassword() {
-    this.pwdSubmitted = true;
-    if (this.passwordForm.invalid) return;
+    this.pwdSubmit = true;
+    if (this.pwdForm.invalid) return;
     if (this.fp['newPwd'].value !== this.fp['confirmPwd'].value) return;
-    this.pwdSuccess = true;
-    this.passwordForm.reset();
-    this.pwdSubmitted = false;
-    setTimeout(() => this.pwdSuccess = false, 3000);
+
+    this.saving    = true;
+    this.saveMsg   = '';
+    this.saveError = '';
+
+    this.api.changePassword({
+      current_password: this.fp['currentPwd'].value,
+      new_password:     this.fp['newPwd'].value,
+    }).subscribe({
+      next: () => {
+        this.saving    = false;
+        this.saveMsg   = 'Mot de passe modifié avec succès.';
+        this.pwdSubmit = false;
+        this.pwdForm.reset();
+        setTimeout(() => this.saveMsg = '', 4000);
+      },
+      error: (err: any) => {
+        this.saving    = false;
+        this.saveError = err?.error?.message || 'Mot de passe actuel incorrect.';
+      }
+    });
   }
 
   get pwdMismatch(): boolean {
-    return this.pwdSubmitted &&
-      this.fp['newPwd'].value !== this.fp['confirmPwd'].value;
+    return this.pwdSubmit && this.fp['newPwd'].value !== this.fp['confirmPwd'].value;
+  }
+
+  private updateLocalStorage(user: any) {
+    try {
+      const raw = localStorage.getItem('currentUser');
+      if (raw) {
+        const stored = JSON.parse(raw);
+        localStorage.setItem('currentUser', JSON.stringify({
+          ...stored,
+          firstName:      user.first_name || stored.firstName,
+          lastName:       user.last_name  || stored.lastName,
+          phone:          user.phone      || stored.phone,
+          city:           user.city       || stored.city,
+          shopName:       user.shop_name  || stored.shopName,
+          profilePicture: user.profile_picture,
+        }));
+      }
+    } catch {}
   }
 }

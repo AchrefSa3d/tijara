@@ -176,11 +176,16 @@ export class TopbarEntrepriseComponent implements OnInit {
    * Logout the user
    */
   logout() {
+    try {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      if (u?.id) localStorage.removeItem(`tijara_cart_${u.id}`);
+    } catch {}
     localStorage.removeItem('currentUser');
     localStorage.removeItem('token');
     localStorage.removeItem('toast');
+    localStorage.removeItem('tijara_cart');
     sessionStorage.clear();
-    this.router.navigate(['/auth/login']);
+    window.location.href = '/auth/login';
   }
 
   windowScroll() {
@@ -308,6 +313,13 @@ export class TopbarEntrepriseComponent implements OnInit {
     }
     this.calculatenotification()
     this.modalService.dismissAll();
+  }
+
+  get displayName(): string {
+    if (!this.userData) return 'Vendeur';
+    return this.userData.shopName ||
+      [this.userData.firstName, this.userData.lastName].filter(Boolean).join(' ') ||
+      'Vendeur';
   }
 
   calculatenotification() {
