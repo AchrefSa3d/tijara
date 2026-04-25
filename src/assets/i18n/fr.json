@@ -338,9 +338,6 @@
     "ACCOUNT": {
       "TEXT": "Mon Compte"
     },
-    "PROFILE": {
-      "TEXT": "Mon Profil"
-    },
     "RECLAMATIONS": {
       "TEXT": "Réclamations"
     },
@@ -381,5 +378,45 @@
     "MY_ACCOUNT": {
       "TEXT": "Mon Compte"
     }
+  },
+  "PROFILE": {
+    "TEXT": "Mon Profil",
+    "MY_INFO": "Mes informations",
+    "PERSONAL_INFO": "Informations personnelles",
+    "SHOP": "Ma boutique",
+    "SECURITY": "Sécurité",
+    "FIRST_NAME": "Prénom",
+    "LAST_NAME": "Nom",
+    "PHONE": "Téléphone",
+    "CITY": "Ville",
+    "FULL_ADDRESS": "Adresse complète",
+    "BIRTH_DATE": "Date de naissance",
+    "GENDER": "Genre",
+    "GENDER_MALE": "Homme",
+    "GENDER_FEMALE": "Femme",
+    "GENDER_OTHER": "Préfère ne pas préciser",
+    "SHOP_NAME": "Nom de la boutique",
+    "COMPANY_NUMBER": "N° de registre commercial",
+    "SAVE": "Enregistrer",
+    "SAVE_CHANGES": "Enregistrer les modifications",
+    "CHANGE_PASSWORD": "Modifier le mot de passe",
+    "CURRENT_PASSWORD": "Mot de passe actuel",
+    "NEW_PASSWORD": "Nouveau mot de passe",
+    "CONFIRM_PASSWORD": "Confirmer",
+    "SELECT": "— Sélectionner —",
+    "VENDOR_LABEL": "Vendeur",
+    "CLIENT_LABEL": "Client",
+    "FOLLOWED_VENDORS": "Vendeurs suivis",
+    "NO_VENDORS": "Vous ne suivez aucun vendeur pour l'instant.",
+    "DISCOVER_SHOP": "Découvrir la boutique",
+    "VIEW_SHOP": "Voir boutique",
+    "ORDERS": "Commandes",
+    "DELIVERED": "Livrées",
+    "PENDING": "En attente",
+    "TOTAL_SPENT": "Total dépensé",
+    "REQUIRED_FIRST_NAME": "Prénom requis.",
+    "REQUIRED_LAST_NAME": "Nom requis.",
+    "PASSWORD_MISMATCH": "Les mots de passe ne correspondent pas.",
+    "REQUIRED_SHOP_NAME": "Nom boutique requis."
   }
 }

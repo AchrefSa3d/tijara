@@ -1,6 +1,9 @@
 export const environment = {
   production: true,
   defaultauth: 'fakebackend',
+  apiUrl: 'http://localhost:3000/api',
+  googleClientId: '',
+  facebookAppId: '0',
   firebaseConfig: {
     apiKey: '',
     authDomain: '',

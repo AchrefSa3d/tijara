@@ -23,7 +23,7 @@
     "@angular/router": "^19.2.20",
     "@bluehalo/ngx-leaflet": "^19.0.0",
     "@ckeditor/ckeditor5-angular": "^9.0.0",
-    "@ckeditor/ckeditor5-build-classic": "^25.0.0",
+    "@ckeditor/ckeditor5-build-classic": "^41.4.2",
     "@ctrl/ngx-emoji-mart": "^9.2.0",
     "@fullcalendar/angular": "^6.1.14",
     "@fullcalendar/core": "^6.1.14",

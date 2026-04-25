@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
+import { IaApiService } from 'src/app/core/services/ia-api.service';
 import { Product } from '../products/products.component';
 
 @Component({
@@ -15,79 +17,172 @@ export class ProductDetailComponent implements OnInit {
     { label: 'Détail produit', active: true }
   ];
 
-  product!: Product;
+  product: any = null;
+  loading = true;
   quantity = 1;
   selectedImage = '';
   activeTab = 'description';
-  cartItems: { product: Product; qty: number }[] = [];
+  cartItems: { product: any; qty: number }[] = [];
   addedToCart = false;
+  relatedProducts: any[]  = [];
+  similarProducts: any[]  = [];
+  aiScore: any            = null;
+  loadingSimilar          = false;
 
-  // Catalogue fictif (même données que products)
-  allProducts: Product[] = [
-    { id: 1,  name: 'Écouteurs Bluetooth Pro',     category: 'Électronique', price: 4500,  oldPrice: 6000,  discount: 25, rating: 4, reviewCount: 128, image: 'assets/images/products/img-1.png',  badge: 'Promo',    badgeClass: 'bg-danger',  stock: 15, vendor: 'TechStore' },
-    { id: 2,  name: 'Montre Connectée Sport',       category: 'Électronique', price: 8900,  oldPrice: 11000, discount: 19, rating: 5, reviewCount: 84,  image: 'assets/images/products/img-2.png',  badge: 'Nouveau',  badgeClass: 'bg-success', stock: 8,  vendor: 'SmartGadget' },
-    { id: 3,  name: 'Veste en Cuir Homme',           category: 'Mode',         price: 12500, oldPrice: 15000, discount: 17, rating: 4, reviewCount: 56,  image: 'assets/images/products/img-3.png',  badge: '',         badgeClass: '',           stock: 20, vendor: 'FashionHub' },
-    { id: 4,  name: 'Canapé Modulable 3 Places',    category: 'Maison',       price: 45000, oldPrice: 55000, discount: 18, rating: 5, reviewCount: 32,  image: 'assets/images/products/img-4.png',  badge: 'Promo',    badgeClass: 'bg-danger',  stock: 3,  vendor: 'MaisonDeco' },
-    { id: 5,  name: 'Vélo de Route Carbon',          category: 'Sport',        price: 35000, oldPrice: 42000, discount: 17, rating: 4, reviewCount: 47,  image: 'assets/images/products/img-5.png',  badge: '',         badgeClass: '',           stock: 5,  vendor: 'SportPro' },
-    { id: 6,  name: 'Crème Hydratante Bio',          category: 'Beauté',       price: 890,   oldPrice: 1200,  discount: 26, rating: 4, reviewCount: 210, image: 'assets/images/products/img-6.png',  badge: 'Bio',      badgeClass: 'bg-success', stock: 50, vendor: 'NatureCare' },
-    { id: 7,  name: 'Tablette Enfant Éducative',     category: 'Jouets',       price: 5500,  oldPrice: 7000,  discount: 21, rating: 5, reviewCount: 98,  image: 'assets/images/products/img-7.png',  badge: 'Top vente',badgeClass: 'bg-warning', stock: 12, vendor: 'KidsWorld' },
-    { id: 8,  name: 'Café Arabica Premium 500g',     category: 'Alimentation', price: 950,   oldPrice: 1200,  discount: 21, rating: 5, reviewCount: 175, image: 'assets/images/products/img-8.png',  badge: 'Top vente',badgeClass: 'bg-warning', stock: 100,vendor: 'GourmetShop' },
-    { id: 9,  name: 'Smartphone 128GB',              category: 'Électronique', price: 28000, oldPrice: 32000, discount: 13, rating: 4, reviewCount: 312, image: 'assets/images/products/img-9.png',  badge: '',         badgeClass: '',           stock: 25, vendor: 'TechStore' },
-    { id: 10, name: 'Sac à Main Femme Cuir',         category: 'Mode',         price: 7500,  oldPrice: 9500,  discount: 21, rating: 4, reviewCount: 67,  image: 'assets/images/products/img-10.png', badge: 'Promo',    badgeClass: 'bg-danger',  stock: 18, vendor: 'FashionHub' },
-    { id: 11, name: 'Aspirateur Robot WiFi',         category: 'Maison',       price: 18000, oldPrice: 22000, discount: 18, rating: 5, reviewCount: 89,  image: 'assets/images/products/img-1.png',  badge: 'Nouveau',  badgeClass: 'bg-success', stock: 7,  vendor: 'MaisonDeco' },
-    { id: 12, name: 'Tapis de Yoga Antidérapant',    category: 'Sport',        price: 1800,  oldPrice: 2500,  discount: 28, rating: 4, reviewCount: 143, image: 'assets/images/products/img-2.png',  badge: 'Promo',    badgeClass: 'bg-danger',  stock: 40, vendor: 'SportPro' },
-  ];
+  // Reviews
+  reviews: any[]   = [];
+  reviewStats: any = null;
+  reviewsLoading   = false;
+  myRating         = 0;
+  myComment        = '';
+  submittingReview = false;
+  reviewError      = '';
+  reviewSuccess    = '';
+  currentUserId: number | null = null;
 
-  reviews = [
-    { author: 'Amina B.', date: '12 mars 2026', rating: 5, comment: 'Excellent produit, livraison rapide. Je recommande vivement !' },
-    { author: 'Karim M.', date: '8 mars 2026',  rating: 4, comment: 'Très bon rapport qualité/prix. Conforme à la description.' },
-    { author: 'Sara L.',  date: '2 mars 2026',  rating: 4, comment: 'Bon produit, emballage soigné. Satisfaite de mon achat.' },
-  ];
+  constructor(
+    private route: ActivatedRoute,
+    private router: Router,
+    private api: TijaraApiService,
+    private ia: IaApiService
+  ) {}
 
-  relatedProducts: Product[] = [];
-
-  constructor(private route: ActivatedRoute, private router: Router) {}
+  private get cartKey(): string {
+    try {
+      const u = JSON.parse(localStorage.getItem('currentUser') || '{}');
+      return u?.id ? `tijara_cart_${u.id}` : 'tijara_cart_guest';
+    } catch { return 'tijara_cart_guest'; }
+  }
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id')) || 1;
-    this.product = this.allProducts.find(p => p.id === id) ?? this.allProducts[0];
-    this.selectedImage = this.product.image;
-    this.relatedProducts = this.allProducts
-      .filter(p => p.category === this.product.category && p.id !== this.product.id)
-      .slice(0, 4);
-    const saved = sessionStorage.getItem('tijara_cart');
+    const saved = localStorage.getItem(this.cartKey);
     this.cartItems = saved ? JSON.parse(saved) : [];
-    this.addedToCart = this.cartItems.some(i => i.product.id === this.product.id);
+
+    const raw = localStorage.getItem('currentUser');
+    if (raw) { try { this.currentUserId = JSON.parse(raw).id; } catch {} }
+
+    this.route.paramMap.subscribe(params => {
+      const id = Number(params.get('id'));
+      if (id) { this.loadProduct(id); }
+    });
   }
 
-  getStars(rating: number): number[] {
-    return Array.from({ length: 5 }, (_, i) => i + 1);
+  loadProduct(id: number): void {
+    this.loading = true;
+    this.api.getProduct(id).subscribe({
+      next: (p: any) => {
+        this.product = {
+          ...p,
+          image:    p.image_url || 'assets/images/products/img-1.png',
+          category: p.category_name || 'Autre',
+          vendor:   p.vendor_name || 'Vendeur',
+          rating:   p.avg_rating || 0,
+          reviewCount: p.review_count || 0,
+        };
+        this.selectedImage = this.product.image;
+        this.loading = false;
+        this.addedToCart = this.cartItems.some(i => i.product.id === id);
+        this.loadReviews(id);
+        this.loadSimilarProducts(id);
+        this.loadAiScore(id);
+      },
+      error: () => { this.loading = false; }
+    });
   }
 
-  increaseQty() { if (this.quantity < this.product.stock) this.quantity++; }
+  loadReviews(productId: number): void {
+    this.reviewsLoading = true;
+    this.api.getProductReviews(productId).subscribe({
+      next: (res: any) => {
+        this.reviews      = res.reviews || [];
+        this.reviewStats  = res.stats;
+        this.reviewsLoading = false;
+        // Pre-fill if user already reviewed
+        const mine = this.reviews.find(r => r.user_id === this.currentUserId);
+        if (mine) { this.myRating = mine.rating; this.myComment = mine.comment || ''; }
+      },
+      error: () => { this.reviewsLoading = false; }
+    });
+  }
+
+  loadSimilarProducts(productId: number): void {
+    this.loadingSimilar = true;
+    this.ia.getSimilarProducts(productId).subscribe({
+      next: (res: any) => {
+        this.similarProducts = (res.similar || []).slice(0, 4);
+        this.loadingSimilar  = false;
+      },
+      error: () => { this.loadingSimilar = false; }
+    });
+  }
+
+  loadAiScore(productId: number): void {
+    this.ia.getPrediction(productId).subscribe({
+      next: (res: any) => { this.aiScore = res; },
+      error: () => {}
+    });
+  }
+
+  get aiScoreClass(): string {
+    const s = this.aiScore?.success_score || 0;
+    if (s >= 70) return 'text-success';
+    if (s >= 40) return 'text-warning';
+    return 'text-danger';
+  }
+
+  get aiScoreBg(): string {
+    const s = this.aiScore?.success_score || 0;
+    if (s >= 70) return 'bg-success';
+    if (s >= 40) return 'bg-warning';
+    return 'bg-danger';
+  }
+
+  submitReview(): void {
+    if (!this.myRating) { this.reviewError = 'Veuillez sélectionner une note.'; return; }
+    if (!this.currentUserId) { this.reviewError = 'Connectez-vous pour laisser un avis.'; return; }
+
+    this.submittingReview = true;
+    this.reviewError      = '';
+    this.reviewSuccess    = '';
+
+    this.api.addProductReview(this.product.id, { rating: this.myRating, comment: this.myComment }).subscribe({
+      next: () => {
+        this.submittingReview = false;
+        this.reviewSuccess    = 'Votre avis a été enregistré !';
+        this.loadReviews(this.product.id);
+      },
+      error: (err: any) => {
+        this.submittingReview = false;
+        this.reviewError = err?.error?.message || 'Erreur lors de l\'envoi.';
+      }
+    });
+  }
+
+  get avgRating(): number {
+    return this.reviewStats?.avg_rating ? parseFloat(this.reviewStats.avg_rating.toFixed(1)) : 0;
+  }
+
+  getRatingPct(star: number): number {
+    if (!this.reviewStats?.total) return 0;
+    const key = `r${star}` as keyof typeof this.reviewStats;
+    return Math.round((this.reviewStats[key] / this.reviewStats.total) * 100);
+  }
+
+  getStars(n: number): number[] { return Array.from({ length: 5 }, (_, i) => i + 1); }
+
+  increaseQty() { if (this.product && this.quantity < this.product.stock) this.quantity++; }
   decreaseQty() { if (this.quantity > 1) this.quantity--; }
 
   addToCart() {
+    if (!this.product) return;
     const existing = this.cartItems.find(i => i.product.id === this.product.id);
-    if (existing) {
-      existing.qty += this.quantity;
-    } else {
-      this.cartItems.push({ product: this.product, qty: this.quantity });
-    }
-    sessionStorage.setItem('tijara_cart', JSON.stringify(this.cartItems));
+    if (existing) { existing.qty += this.quantity; } else { this.cartItems.push({ product: this.product, qty: this.quantity }); }
+    localStorage.setItem(this.cartKey, JSON.stringify(this.cartItems));
     this.addedToCart = true;
   }
 
-  buyNow() {
-    this.addToCart();
-    this.router.navigate(['/shop/cart']);
-  }
-
-  goBack() {
-    this.router.navigate(['/shop/products']);
-  }
-
-  goRelated(id: number) {
-    this.router.navigate(['/shop/product-detail', id]);
-  }
+  buyNow() { this.addToCart(); this.router.navigate(['/shop/cart']); }
+  goBack() { this.router.navigate(['/shop/products']); }
+  goSeller(vendorId: number) { this.router.navigate(['/shop/seller-details', vendorId]); }
+  goRelated(id: number) { this.router.navigate(['/shop/product-detail', id]); }
 }

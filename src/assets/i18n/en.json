@@ -7,24 +7,23 @@
   "MENUITEMS": {
     "MENU": {
       "TEXT": "MENU",
-      "Reclamations":  " my Reclamations ",
-      "Add": " Add ",
-      "Edit": " Edit ",
-      "View": " View "
-      
+      "Reclamations": "My Reclamations",
+      "Add": "Add",
+      "Edit": "Edit",
+      "View": "View"
     },
     "USERS": {
       "TEXT": "Users",
-      "Users" : "users",
-      "User" : "User",
-      "FirstName": "FirstName",
-      "LastName":  "LastName",
+      "Users": "users",
+      "User": "User",
+      "FirstName": "First Name",
+      "LastName": "Last Name",
       "Email": "Email",
       "Roles": "Roles",
       "Active": "Active",
       "Gender": "Gender",
       "Male": "Male",
-      "Femal": "Femal"
+      "Femal": "Female"
     },
     "DASHBOARD": {
       "TEXT": "Dashboards",
@@ -123,7 +122,28 @@
       }
     },
     "PAGES": {
-      "TEXT": "Pages"
+      "TEXT": "Pages",
+      "LIST": {
+        "STARTER": "Starter",
+        "PROFILE": "Profile",
+        "SIMPLEPAGE": "Simple Page",
+        "SETTINGS": "Settings",
+        "TEAM": "Team",
+        "TIMELINE": "Timeline",
+        "FAQS": "FAQs",
+        "PRICING": "Pricing",
+        "GALLERY": "Gallery",
+        "MAINTENANCE": "Maintenance",
+        "COMINGSOON": "Coming Soon",
+        "SITEMAP": "Sitemap",
+        "SEARCHRESULTS": "Search Results",
+        "PRIVACYPOLICY": "Privacy Policy",
+        "TERMS&CONDITIONS": "Terms & Conditions",
+        "BLOG": "Blog",
+        "BLOGLIST": "List View",
+        "BLOGOVERVIEW": "Overview",
+        "BLOGGRID": "Grid View"
+      }
     },
     "AUTHENTICATION": {
       "TEXT": "Authentication",
@@ -144,30 +164,6 @@
         "404ALT": "404 Alt",
         "500": "500",
         "OFFLINE": "Offline Page"
-      }
-    },
-    "PAGES": {
-      "TEXT": "Pages",
-      "LIST": {
-        "STARTER": "Starter",
-        "PROFILE": "Profile",
-        "SIMPLEPAGE": "Simple Page",
-        "SETTINGS": "Settings",
-        "TEAM": "Team",
-        "TIMELINE": "Timeline",
-        "FAQS": "FAQs",
-        "PRICING": "Pricing",
-        "GALLERY": "Gallery",
-        "MAINTENANCE": "Maintenance",
-        "COMINGSOON": "Coming Soon",
-        "SITEMAP": "Sitemap",
-        "SEARCHRESULTS": "Search Results",
-        "PRIVACYPOLICY": "Privacy Policy",
-        "TERMS&CONDITIONS": "Term & Conditions",
-        "BLOG": "Blog",
-        "BLOGLIST": "List View",
-        "BLOGOVERVIEW": "Overview",
-        "BLOGGRID": "Grid View"
       }
     },
     "LANDING": {
@@ -200,7 +196,7 @@
         "PLACEHOLDERS": "Placeholders",
         "PROGRESS": "Progress",
         "NOTIFICATIONS": "Notifications",
-        "MEDIAOBJECT": "Media object",
+        "MEDIAOBJECT": "Media Object",
         "EMBEDVIDEO": "Embed Video",
         "TYPOGRAPHY": "Typography",
         "LISTS": "Lists",
@@ -232,7 +228,7 @@
       "LIST": {
         "BASICELEMENTS": "Basic Elements",
         "FORMSELECT": "Form Select",
-        "CHECKBOXS&RADIOS": "Checkboxs & Radios",
+        "CHECKBOXS&RADIOS": "Checkboxes & Radios",
         "PICKERS": "Pickers",
         "INPUTMASKS": "Input Masks",
         "ADVANCED": "Advanced",
@@ -266,17 +262,17 @@
         "RANGEAREA": "Range Area",
         "FUNNEL": "Funnel",
         "SLOPE": "Slope",
-        "CANDLSTICK": "Candlstick",
+        "CANDLSTICK": "Candlestick",
         "BOXPLOT": "Boxplot",
         "BUBBLE": "Bubble",
         "SCATTER": "Scatter",
         "HEATMAP": "Heatmap",
         "TREEMAP": "Treemap",
         "PIE": "Pie",
-        "RADIALBAR": "Radialbar",
+        "RADIALBAR": "Radial Bar",
         "RADAR": "Radar",
         "POLARAREA": "Polar Area",
-        "CHARTJS": "Chartjs",
+        "CHARTJS": "Chart.js",
         "ECHARTS": "Echarts"
       }
     },
@@ -350,9 +346,6 @@
     "ACCOUNT": {
       "TEXT": "My Account"
     },
-    "PROFILE": {
-      "TEXT": "My Profile"
-    },
     "RECLAMATIONS": {
       "TEXT": "Complaints"
     },
@@ -366,27 +359,26 @@
         "ADD": "Add Category"
       }
     },
+    "COMMUNITY": {
+      "TEXT": "Community"
+    },
+    "ANNONCES": {
+      "TEXT": "Ads & Deals"
+    },
+    "MODERATION": {
+      "TEXT": "Moderation"
+    },
     "STATS": {
       "TEXT": "Statistics"
-    },
-    "MY_ACCOUNT": {
-      "TEXT": "My Account"
     },
     "ANALYTICS": {
       "TEXT": "Analytics"
     },
+    "MY_ACCOUNT": {
+      "TEXT": "My Account"
+    },
     "CAUSES": {
       "TEXT": "Causes"
-    },
-    "USERS": {
-      "TEXT": "Users",
-      "LIST": {
-        "ALL": "All Users",
-        "ADD": "Add User"
-      }
-    },
-    "GEO": {
-      "TEXT": "Geography"
     },
     "MULTILEVEL": {
       "TEXT": "Multi Level",
@@ -401,5 +393,45 @@
         }
       }
     }
+  },
+  "PROFILE": {
+    "TEXT": "My Profile",
+    "MY_INFO": "My information",
+    "PERSONAL_INFO": "Personal information",
+    "SHOP": "My shop",
+    "SECURITY": "Security",
+    "FIRST_NAME": "First name",
+    "LAST_NAME": "Last name",
+    "PHONE": "Phone",
+    "CITY": "City",
+    "FULL_ADDRESS": "Full address",
+    "BIRTH_DATE": "Date of birth",
+    "GENDER": "Gender",
+    "GENDER_MALE": "Male",
+    "GENDER_FEMALE": "Female",
+    "GENDER_OTHER": "Prefer not to say",
+    "SHOP_NAME": "Shop name",
+    "COMPANY_NUMBER": "Business registration number",
+    "SAVE": "Save",
+    "SAVE_CHANGES": "Save changes",
+    "CHANGE_PASSWORD": "Change password",
+    "CURRENT_PASSWORD": "Current password",
+    "NEW_PASSWORD": "New password",
+    "CONFIRM_PASSWORD": "Confirm",
+    "SELECT": "— Select —",
+    "VENDOR_LABEL": "Vendor",
+    "CLIENT_LABEL": "Client",
+    "FOLLOWED_VENDORS": "Followed vendors",
+    "NO_VENDORS": "You are not following any vendor yet.",
+    "DISCOVER_SHOP": "Discover the shop",
+    "VIEW_SHOP": "View shop",
+    "ORDERS": "Orders",
+    "DELIVERED": "Delivered",
+    "PENDING": "Pending",
+    "TOTAL_SPENT": "Total spent",
+    "REQUIRED_FIRST_NAME": "First name required.",
+    "REQUIRED_LAST_NAME": "Last name required.",
+    "PASSWORD_MISMATCH": "Passwords do not match.",
+    "REQUIRED_SHOP_NAME": "Shop name required."
   }
 }

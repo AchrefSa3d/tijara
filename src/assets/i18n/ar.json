@@ -7,21 +7,21 @@
   "MENUITEMS": {
     "MENU": {
       "TEXT": "MENU",
-      "Reclamations":  " الشكايات ",
+      "Reclamations": "الشكايات",
       "Add": "إضافة",
-      "Edit": " تعديل ",
-      "View": " عرض"
-      
+      "Edit": "تعديل",
+      "View": "عرض"
     },
     "USERS": {
-      "Users" : "المستخدمين",
-      "User" : "المستخدم",
+      "TEXT": "المستخدمون",
+      "Users": "المستخدمين",
+      "User": "المستخدم",
       "FirstName": "الإسم",
-      "LastName":  " اللقب ",
+      "LastName": "اللقب",
       "Email": "البريد الإلكتروني",
-      "Roles": " وظائف ",
-      "Active": " فعل",
-      "Gender": " الجنس",
+      "Roles": "وظائف",
+      "Active": "فعل",
+      "Gender": "الجنس",
       "Male": "ذكر",
       "Femal": "أنثى"
     },
@@ -56,7 +56,7 @@
         "PRODUCTS": "منتجات",
         "PRODUCTDETAILS": "تفاصيل المنتج",
         "CREATEPRODUCT": "إنشاء منتج",
-        "ORDERS": "الطلب #٪ s",
+        "ORDERS": "الطلبات",
         "ORDERDETAILS": "تفاصيل الطلب",
         "CUSTOMERS": "عملاء",
         "SHOPPINGCART": "عربة التسوق",
@@ -79,7 +79,7 @@
         "CRYPTO": "تشفير",
         "TRANSACTIONS": "المعاملات",
         "BUY&SELL": "شراء بيع",
-        "MYWALLET": "محفظتى",
+        "MYWALLET": "محفظتي",
         "ICOLIST": "قائمة ICO",
         "KYCAPPLICATION": "تطبيق KYC",
         "INVOICES": "الفواتير",
@@ -98,11 +98,11 @@
         "WALLETCONNECT": "Wallet Connect",
         "CREATENFT": "إنشاء NFT",
         "FILEMANAGER": "مدير الملفات",
-        "TODO": "لكى يفعل",
+        "TODO": "للقيام به",
         "JOBS": "وظائف",
         "STATISTICS": "إحصائيات",
         "JOBLISTS": "قوائم الوظائف",
-        "GRID": "جريد",
+        "GRID": "شبكة",
         "CANDIDATELISTS": "قائمة المرشحين",
         "GRIDVIEW": "عرض شبكي",
         "APPLICATION": "طلب",
@@ -122,7 +122,28 @@
       }
     },
     "PAGES": {
-      "TEXT": "الصفحات"
+      "TEXT": "الصفحات",
+      "LIST": {
+        "STARTER": "بداية",
+        "PROFILE": "الملف الشخصي",
+        "SIMPLEPAGE": "صفحة بسيطة",
+        "SETTINGS": "إعدادات",
+        "TEAM": "فريق",
+        "TIMELINE": "الجدول الزمني",
+        "FAQS": "أسئلة وأجوبة",
+        "PRICING": "التسعير",
+        "GALLERY": "صالة عرض",
+        "MAINTENANCE": "أعمال صيانة",
+        "COMINGSOON": "قريبا",
+        "SITEMAP": "خريطة الموقع",
+        "SEARCHRESULTS": "نتائج البحث",
+        "PRIVACYPOLICY": "سياسة الخصوصية",
+        "TERMS&CONDITIONS": "الشروط والأحكام",
+        "BLOG": "مدونة",
+        "BLOGLIST": "عرض القائمة",
+        "BLOGOVERVIEW": "نظرة عامة",
+        "BLOGGRID": "عرض الشبكة"
+      }
     },
     "AUTHENTICATION": {
       "TEXT": "المصادقة",
@@ -143,30 +164,6 @@
         "404ALT": "404 بديل",
         "500": "500",
         "OFFLINE": "الصفحة غير المتصلة"
-      }
-    },
-    "PAGES": {
-      "TEXT": "الصفحات",
-      "LIST": {
-        "STARTER": "بداية",
-        "PROFILE": "الملف الشخصي",
-        "SIMPLEPAGE": "صفحة بسيطة",
-        "SETTINGS": "إعدادات",
-        "TEAM": "فريق",
-        "TIMELINE": "الجدول الزمني",
-        "FAQS": "أسئلة وأجوبة",
-        "PRICING": "التسعير",
-        "GALLERY": "صالة عرض",
-        "MAINTENANCE": "اعمال صيانة",
-        "COMINGSOON": "قريبا",
-        "SITEMAP": "خريطة الموقع",
-        "SEARCHRESULTS": "نتائج البحث",
-        "PRIVACYPOLICY": "سياسة الخصوصية",
-        "TERMS&CONDITIONS": "الشروط والأحكام",
-        "BLOG": "مدونة",
-        "BLOGLIST": "عرض القائمة",
-        "BLOGOVERVIEW": "نظرة عامة",
-        "BLOGGRID": "عرض الشبكة"
       }
     },
     "LANDING": {
@@ -190,7 +187,7 @@
         "CARDS": "البطاقات",
         "CAROUSEL": "دائري",
         "DROPDOWNS": "هبوط قطرة",
-        "GRID": "جريد",
+        "GRID": "شبكة",
         "IMAGES": "الصور",
         "TABS": "نوافذ التبويب",
         "ACCORDION&COLLAPSE": "الأكورديون والانهيار",
@@ -213,7 +210,7 @@
       "TEXT": "واجهة المستخدم المتقدمة",
       "LIST": {
         "SWEETALERTS": "تنبيهات حلوة",
-        "NESTABLELIST": "قائمة عش",
+        "NESTABLELIST": "قائمة متداخلة",
         "SCROLLBAR": "شريط التمرير",
         "ANIMATION": "الرسوم المتحركة",
         "TOUR": "رحلة",
@@ -298,6 +295,75 @@
         "LEAFLET": "منشور"
       }
     },
+    "GENERAL": {
+      "TEXT": "عام"
+    },
+    "CATALOGUE": {
+      "TEXT": "الكتالوج"
+    },
+    "ORDERS_SECTION": {
+      "TEXT": "الطلبات"
+    },
+    "USERS_SECTION": {
+      "TEXT": "المستخدمون"
+    },
+    "GEO": {
+      "TEXT": "الجغرافيا"
+    },
+    "SUPPORT": {
+      "TEXT": "الدعم"
+    },
+    "COUNTRIES": {
+      "TEXT": "الدول"
+    },
+    "CITIES": {
+      "TEXT": "المدن"
+    },
+    "SHOP": {
+      "TEXT": "متجري"
+    },
+    "PRODUCTS": {
+      "TEXT": "المنتجات"
+    },
+    "CART": {
+      "TEXT": "سلة التسوق"
+    },
+    "ORDERS": {
+      "TEXT": "الطلبات"
+    },
+    "CHAT": {
+      "TEXT": "الرسائل"
+    },
+    "ACCOUNT": {
+      "TEXT": "حسابي"
+    },
+    "RECLAMATIONS": {
+      "TEXT": "الشكاوى"
+    },
+    "VENDORS": {
+      "TEXT": "البائعون"
+    },
+    "CATEGORIES": {
+      "TEXT": "الفئات"
+    },
+    "COMMUNITY": {
+      "TEXT": "المجتمع"
+    },
+    "ANNONCES": {
+      "TEXT": "الإعلانات والعروض"
+    },
+    "MODERATION": {
+      "TEXT": "الإشراف"
+    },
+    "STATS": {
+      "TEXT": "الإحصائيات"
+    },
+    "ANALYTICS": {
+      "TEXT": "التحليلات"
+    },
+    "MY_ACCOUNT": {
+      "TEXT": "حسابي"
+    },
     "MULTILEVEL": {
       "TEXT": "متعدد المستويات",
       "LIST": {
@@ -311,5 +377,45 @@
         }
       }
     }
+  },
+  "PROFILE": {
+    "TEXT": "ملفي الشخصي",
+    "MY_INFO": "معلوماتي",
+    "PERSONAL_INFO": "المعلومات الشخصية",
+    "SHOP": "متجري",
+    "SECURITY": "الأمان",
+    "FIRST_NAME": "الاسم الأول",
+    "LAST_NAME": "اللقب",
+    "PHONE": "الهاتف",
+    "CITY": "المدينة",
+    "FULL_ADDRESS": "العنوان الكامل",
+    "BIRTH_DATE": "تاريخ الميلاد",
+    "GENDER": "الجنس",
+    "GENDER_MALE": "ذكر",
+    "GENDER_FEMALE": "أنثى",
+    "GENDER_OTHER": "أفضل عدم التحديد",
+    "SHOP_NAME": "اسم المتجر",
+    "COMPANY_NUMBER": "رقم السجل التجاري",
+    "SAVE": "حفظ",
+    "SAVE_CHANGES": "حفظ التعديلات",
+    "CHANGE_PASSWORD": "تغيير كلمة المرور",
+    "CURRENT_PASSWORD": "كلمة المرور الحالية",
+    "NEW_PASSWORD": "كلمة المرور الجديدة",
+    "CONFIRM_PASSWORD": "تأكيد",
+    "SELECT": "— اختر —",
+    "VENDOR_LABEL": "بائع",
+    "CLIENT_LABEL": "عميل",
+    "FOLLOWED_VENDORS": "البائعون المتابَعون",
+    "NO_VENDORS": "لا تتابع أي بائع حتى الآن.",
+    "DISCOVER_SHOP": "اكتشف المتجر",
+    "VIEW_SHOP": "عرض المتجر",
+    "ORDERS": "الطلبات",
+    "DELIVERED": "تم التسليم",
+    "PENDING": "قيد الانتظار",
+    "TOTAL_SPENT": "إجمالي المصروف",
+    "REQUIRED_FIRST_NAME": "الاسم الأول مطلوب.",
+    "REQUIRED_LAST_NAME": "اللقب مطلوب.",
+    "PASSWORD_MISMATCH": "كلمات المرور غير متطابقة.",
+    "REQUIRED_SHOP_NAME": "اسم المتجر مطلوب."
   }
 }

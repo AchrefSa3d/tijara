@@ -1,306 +1,316 @@
-<app-breadcrumbs title="Mon Profil" [breadcrumbItems]="breadcrumbItems"></app-breadcrumbs>
+<app-breadcrumbs [title]="'PROFILE.TEXT' | translate" [breadcrumbItems]="breadcrumbItems"></app-breadcrumbs>
 
-<!-- Alerts -->
-@if(saveSuccess){
-<div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 mb-4">
-  <i class="ri-checkbox-circle-fill fs-18"></i>
-  <span class="fs-14">Votre profil a été mis à jour avec succès.</span>
-</div>
-}
-@if(pwdSuccess){
-<div class="alert alert-success border-0 shadow-sm d-flex align-items-center gap-2 mb-4">
-  <i class="ri-shield-check-fill fs-18"></i>
-  <span class="fs-14">Mot de passe modifié avec succès.</span>
-</div>
-}
+@if (loading) {
+  <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+} @else {
 
-<div class="row g-4">
-
-  <!-- LEFT: Avatar + Stats card -->
-  <div class="col-lg-4">
-
-    <!-- Avatar card -->
-    <div class="card border-0 shadow-sm mb-4 text-center overflow-hidden">
-      <div style="height:80px;background:linear-gradient(135deg,#1a2d6e,#405189,#0a7d6e)"></div>
-      <div class="card-body pt-0">
-        <div class="avatar-xl rounded-circle d-flex align-items-center justify-content-center mx-auto fw-bold text-white fs-28"
-             style="background:linear-gradient(135deg,#405189,#0ab39c);margin-top:-40px;border:4px solid #fff;box-shadow:0 4px 16px rgba(64,81,137,.3)">
-          {{ initials }}
-        </div>
-        <h5 class="mt-3 mb-1 fw-bold">{{ profile.firstName }} {{ profile.lastName }}</h5>
-        <p class="text-muted fs-13 mb-2">{{ profile.email }}</p>
-        <span class="badge bg-success-subtle text-success rounded-pill px-3">
-          <i class="ri-verified-badge-line me-1"></i>Compte vérifié
-        </span>
-        <div class="mt-3 pt-3 border-top">
-          <div class="d-flex justify-content-center gap-2">
-            <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="startEdit()">
-              <i class="ri-edit-line me-1"></i>Modifier
-            </button>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill px-3"
-                    (click)="passwordMode = !passwordMode">
-              <i class="ri-lock-line me-1"></i>Mot de passe
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-transparent border-bottom py-3">
-        <h6 class="mb-0 fw-semibold fs-14">
-          <i class="ri-bar-chart-line me-2 text-primary"></i>Mon activité
-        </h6>
-      </div>
-      <div class="card-body p-0">
-        @for(stat of stats; track $index){
-        <div class="d-flex align-items-center justify-content-between px-3 py-3"
-             [class.border-bottom]="$index < stats.length - 1">
-          <div class="d-flex align-items-center gap-2">
-            <div class="avatar-xs rounded-circle bg-{{stat.color}}-subtle d-flex align-items-center justify-content-center">
-              <i class="{{stat.icon}} text-{{stat.color}} fs-14"></i>
-            </div>
-            <span class="text-muted fs-13">{{ stat.label }}</span>
-          </div>
-          <span class="fw-bold text-{{stat.color}} fs-15">{{ stat.value }}</span>
-        </div>
+<!-- ── BANNIÈRE PROFIL ───────────────────────────────────────────────────────── -->
+<div class="profile-banner mb-4">
+  <div class="profile-banner-bg"></div>
+  <div class="profile-banner-content">
+    <div class="profile-avatar-wrap">
+      <div class="profile-avatar">
+        @if (profilePicture) {
+          <img [src]="profilePicture" alt="Photo profil" class="w-100 h-100 object-fit-cover rounded-circle">
+        } @else {
+          <span class="fw-bold text-white" style="font-size:36px">{{ initials }}</span>
         }
       </div>
+      <label class="profile-avatar-edit" title="Changer la photo">
+        <i class="ri-camera-line"></i>
+        <input type="file" accept="image/*" class="d-none" (change)="onPhotoSelected($event)">
+      </label>
+    </div>
+    <div class="profile-banner-info">
+      <h4 class="text-white fw-bold mb-1">{{ fullName }}</h4>
+      <span class="text-white opacity-75 fs-13">
+        <i class="ri-user-3-line me-1"></i>{{ 'PROFILE.CLIENT_LABEL' | translate }}
+        @if (fi['city'].value) { · {{ fi['city'].value }} }
+      </span>
     </div>
   </div>
+</div>
 
-  <!-- RIGHT: Info + Forms -->
-  <div class="col-lg-8">
-
-    <!-- View Mode -->
-    @if(!editMode){
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
-        <h6 class="mb-0 fw-semibold fs-14">
-          <i class="ri-user-line me-2 text-primary"></i>Informations personnelles
-        </h6>
-        <button class="btn btn-sm btn-primary rounded-pill px-3" (click)="startEdit()">
-          <i class="ri-edit-line me-1"></i>Modifier
-        </button>
-      </div>
-      <div class="card-body">
-        <div class="row g-4">
-          <div class="col-sm-6">
-            <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Prénom</p>
-            <p class="mb-0 fs-14 fw-medium">{{ profile.firstName }}</p>
-          </div>
-          <div class="col-sm-6">
-            <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Nom</p>
-            <p class="mb-0 fs-14 fw-medium">{{ profile.lastName }}</p>
-          </div>
-          <div class="col-sm-6">
-            <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Adresse e-mail</p>
-            <p class="mb-0 fs-14 fw-medium">{{ profile.email }}</p>
-          </div>
-          <div class="col-sm-6">
-            <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Téléphone</p>
-            <p class="mb-0 fs-14 fw-medium">{{ profile.phone }}</p>
-          </div>
-          <div class="col-sm-6">
-            <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Date de naissance</p>
-            <p class="mb-0 fs-14 fw-medium">{{ profile.birthDate }}</p>
-          </div>
-          <div class="col-sm-6">
-            <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Genre</p>
-            <p class="mb-0 fs-14 fw-medium">{{ profile.gender }}</p>
-          </div>
-        </div>
-
-        <div class="mt-4 pt-4 border-top">
-          <h6 class="fw-semibold fs-14 mb-3">
-            <i class="ri-map-pin-line me-2 text-success"></i>Adresse de livraison
-          </h6>
-          <div class="row g-3">
-            <div class="col-sm-6">
-              <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Rue</p>
-              <p class="mb-0 fs-14 fw-medium">{{ profile.address }}</p>
-            </div>
-            <div class="col-sm-6">
-              <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Ville</p>
-              <p class="mb-0 fs-14 fw-medium">{{ profile.city }}</p>
-            </div>
-            <div class="col-sm-6">
-              <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Code postal</p>
-              <p class="mb-0 fs-14 fw-medium">{{ profile.postalCode }}</p>
-            </div>
-            <div class="col-sm-6">
-              <p class="text-muted fs-12 text-uppercase fw-semibold mb-1" style="letter-spacing:.8px">Pays</p>
-              <p class="mb-0 fs-14 fw-medium">{{ profile.country }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
+<!-- ── STATISTIQUES ─────────────────────────────────────────────────────────── -->
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
+      <i class="ri-shopping-bag-3-line fs-24 text-primary mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.total }}</h5>
+      <small class="text-muted">{{ 'PROFILE.ORDERS' | translate }}</small>
     </div>
-    }
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
+      <i class="ri-truck-line fs-24 text-success mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.delivered }}</h5>
+      <small class="text-muted">{{ 'PROFILE.DELIVERED' | translate }}</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
+      <i class="ri-time-line fs-24 text-warning mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.pending }}</h5>
+      <small class="text-muted">{{ 'PROFILE.PENDING' | translate }}</small>
+    </div>
+  </div>
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center py-3" style="border-radius:14px">
+      <i class="ri-money-dollar-circle-line fs-24 text-info mb-1"></i>
+      <h5 class="fw-bold mb-0">{{ ordersStats.totalSpent | number:'1.0-0' }} DT</h5>
+      <small class="text-muted">{{ 'PROFILE.TOTAL_SPENT' | translate }}</small>
+    </div>
+  </div>
+</div>
 
-    <!-- Edit Mode -->
-    @if(editMode){
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
-        <h6 class="mb-0 fw-semibold fs-14">
-          <i class="ri-edit-line me-2 text-primary"></i>Modifier mes informations
-        </h6>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill" (click)="cancelEdit()">
-          <i class="ri-close-line me-1"></i>Annuler
+<!-- ── Alertes ─────────────────────────────────────────────────────────────── -->
+@if (saveMsg) {
+  <div class="alert alert-success d-flex align-items-center gap-2 py-2 mb-3">
+    <i class="ri-check-circle-line fs-18"></i>{{ saveMsg }}
+  </div>
+}
+@if (saveError) {
+  <div class="alert alert-danger d-flex align-items-center gap-2 py-2 mb-3">
+    <i class="ri-error-warning-line fs-18"></i>{{ saveError }}
+  </div>
+}
+
+<!-- ── ONGLETS ──────────────────────────────────────────────────────────────── -->
+<div class="card border-0 shadow-sm" style="border-radius:16px">
+  <div class="card-header border-0 bg-transparent pt-4 px-4 pb-0">
+    <ul class="nav nav-tabs-profile gap-1">
+      <li class="nav-item">
+        <button class="nav-link-profile" [class.active]="activeTab==='info'" (click)="activeTab='info'">
+          <i class="ri-user-line me-1"></i>{{ 'PROFILE.MY_INFO' | translate }}
         </button>
-      </div>
-      <div class="card-body">
+      </li>
+      <li class="nav-item">
+        <button class="nav-link-profile" [class.active]="activeTab==='security'" (click)="activeTab='security'">
+          <i class="ri-lock-line me-1"></i>{{ 'PROFILE.SECURITY' | translate }}
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link-profile" [class.active]="activeTab==='follows'" (click)="activeTab='follows'">
+          <i class="ri-user-follow-line me-1"></i>{{ 'PROFILE.FOLLOWED_VENDORS' | translate }}
+          @if(followedVendors.length > 0) {
+            <span class="badge bg-primary-subtle text-primary ms-1">{{ followedVendors.length }}</span>
+          }
+        </button>
+      </li>
+    </ul>
+  </div>
+
+  <div class="card-body p-4">
+
+    <!-- INFOS ──────────────────────────────────────────────── -->
+    @if (activeTab === 'info') {
+      <form [formGroup]="infoForm" (ngSubmit)="saveProfile()">
         <div class="row g-3">
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Prénom</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.firstName">
+          @if (isVendor) {
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">
+              <i class="ri-store-2-line me-1 text-warning"></i>{{ 'PROFILE.SHOP_NAME' | translate }}
+            </label>
+            <input type="text" class="form-control" formControlName="shopName"
+                   placeholder="Ex: TechTunis, ModeTN...">
           </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Nom</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.lastName">
+          }
+          <div class="col-md-6">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.FIRST_NAME' | translate }} <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="firstName"
+                   [placeholder]="'PROFILE.FIRST_NAME' | translate"
+                   [class.is-invalid]="submitted && fi['firstName'].invalid">
+            @if (submitted && fi['firstName'].errors?.['required']) {
+              <div class="invalid-feedback">{{ 'PROFILE.REQUIRED_FIRST_NAME' | translate }}</div>
+            }
           </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Adresse e-mail</label>
-            <input type="email" class="form-control" [(ngModel)]="editData.email">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.LAST_NAME' | translate }} <span class="text-danger">*</span></label>
+            <input type="text" class="form-control" formControlName="lastName"
+                   [placeholder]="'PROFILE.LAST_NAME' | translate"
+                   [class.is-invalid]="submitted && fi['lastName'].invalid">
+            @if (submitted && fi['lastName'].errors?.['required']) {
+              <div class="invalid-feedback">{{ 'PROFILE.REQUIRED_LAST_NAME' | translate }}</div>
+            }
           </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Téléphone</label>
-            <input type="tel" class="form-control" [(ngModel)]="editData.phone">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.PHONE' | translate }}</label>
+            <div class="input-group">
+              <span class="input-group-text bg-white"><i class="ri-phone-line text-muted"></i></span>
+              <input type="tel" class="form-control" formControlName="phone" placeholder="Ex : 55123456">
+            </div>
           </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Date de naissance</label>
-            <input type="date" class="form-control" [(ngModel)]="editData.birthDate">
-          </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Genre</label>
-            <select class="form-select" [(ngModel)]="editData.gender">
-              <option>Homme</option>
-              <option>Femme</option>
+          <div class="col-md-6">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.CITY' | translate }}</label>
+            <select class="form-select" formControlName="city">
+              <option value="">{{ 'PROFILE.SELECT' | translate }}</option>
+              @for (w of wilayas; track w) {
+                <option [value]="w">{{ w }}</option>
+              }
             </select>
           </div>
-
-          <div class="col-12 mt-2 pt-2 border-top">
-            <h6 class="fw-semibold fs-14 mb-3">
-              <i class="ri-map-pin-line me-2 text-success"></i>Adresse de livraison
-            </h6>
-          </div>
           <div class="col-12">
-            <label class="form-label fw-medium fs-13">Rue</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.address">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.FULL_ADDRESS' | translate }}</label>
+            <input type="text" class="form-control" formControlName="address"
+                   placeholder="Rue, immeuble, n°...">
           </div>
-          <div class="col-sm-4">
-            <label class="form-label fw-medium fs-13">Ville</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.city">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold fs-13">
+              <i class="ri-cake-line me-1 text-muted"></i>{{ 'PROFILE.BIRTH_DATE' | translate }}
+            </label>
+            <input type="date" class="form-control" formControlName="birthDate">
           </div>
-          <div class="col-sm-4">
-            <label class="form-label fw-medium fs-13">Code postal</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.postalCode">
-          </div>
-          <div class="col-sm-4">
-            <label class="form-label fw-medium fs-13">Pays</label>
-            <input type="text" class="form-control" [(ngModel)]="editData.country">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold fs-13">
+              <i class="ri-user-line me-1 text-muted"></i>{{ 'PROFILE.GENDER' | translate }}
+            </label>
+            <select class="form-select" formControlName="gender">
+              <option value="">{{ 'PROFILE.SELECT' | translate }}</option>
+              <option value="homme">{{ 'PROFILE.GENDER_MALE' | translate }}</option>
+              <option value="femme">{{ 'PROFILE.GENDER_FEMALE' | translate }}</option>
+              <option value="autre">{{ 'PROFILE.GENDER_OTHER' | translate }}</option>
+            </select>
           </div>
         </div>
-
-        <div class="d-flex justify-content-end gap-2 mt-4">
-          <button type="button" class="btn btn-outline-secondary rounded-pill px-4" (click)="cancelEdit()">
-            Annuler
-          </button>
-          <button type="button" class="btn btn-primary rounded-pill px-4" (click)="saveProfile()">
-            <i class="ri-save-line me-1"></i>Enregistrer
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary px-5" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            {{ 'PROFILE.SAVE_CHANGES' | translate }}
           </button>
         </div>
-      </div>
-    </div>
+      </form>
     }
 
-    <!-- Password Change -->
-    @if(passwordMode){
-    <div class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-transparent border-bottom py-3 d-flex align-items-center justify-content-between">
-        <h6 class="mb-0 fw-semibold fs-14">
-          <i class="ri-lock-password-line me-2 text-warning"></i>Changer le mot de passe
-        </h6>
-        <button class="btn btn-sm btn-outline-secondary rounded-pill" (click)="passwordMode = false">
-          <i class="ri-close-line me-1"></i>Annuler
-        </button>
-      </div>
-      <div class="card-body">
-        @if(pwdError){
-        <div class="alert alert-danger border-0 d-flex align-items-center gap-2 py-2 fs-13">
-          <i class="ri-error-warning-line fs-16"></i>{{ pwdError }}
+    <!-- SÉCURITÉ ─────────────────────────────────────────── -->
+    @if (activeTab === 'security') {
+      <form [formGroup]="pwdForm" (ngSubmit)="changePassword()">
+        <div class="row g-3" style="max-width:480px">
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.CURRENT_PASSWORD' | translate }} <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input [type]="showCurPwd ? 'text' : 'password'" class="form-control"
+                     formControlName="currentPwd" placeholder="••••••••"
+                     [class.is-invalid]="pwdSubmit && fp['currentPwd'].invalid">
+              <button type="button" class="btn btn-outline-secondary" (click)="showCurPwd=!showCurPwd">
+                <i class="{{ showCurPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.NEW_PASSWORD' | translate }} <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input [type]="showNewPwd ? 'text' : 'password'" class="form-control"
+                     formControlName="newPwd" placeholder="Min. 6 caractères"
+                     [class.is-invalid]="pwdSubmit && fp['newPwd'].invalid">
+              <button type="button" class="btn btn-outline-secondary" (click)="showNewPwd=!showNewPwd">
+                <i class="{{ showNewPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
+              </button>
+            </div>
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-semibold fs-13">{{ 'PROFILE.CONFIRM_PASSWORD' | translate }} <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <input [type]="showConPwd ? 'text' : 'password'" class="form-control"
+                     formControlName="confirmPwd" placeholder="Répéter le mot de passe"
+                     [class.is-invalid]="pwdMismatch">
+              <button type="button" class="btn btn-outline-secondary" (click)="showConPwd=!showConPwd">
+                <i class="{{ showConPwd ? 'ri-eye-off-line' : 'ri-eye-line' }}"></i>
+              </button>
+            </div>
+            @if (pwdMismatch) {
+              <div class="text-danger fs-12 mt-1">{{ 'PROFILE.PASSWORD_MISMATCH' | translate }}</div>
+            }
+          </div>
         </div>
-        }
+        <div class="d-flex justify-content-end mt-4">
+          <button type="submit" class="btn btn-primary px-5" [disabled]="saving">
+            @if (saving) { <span class="spinner-border spinner-border-sm me-2"></span> }
+            {{ 'PROFILE.CHANGE_PASSWORD' | translate }}
+          </button>
+        </div>
+      </form>
+    }
+
+    <!-- VENDEURS SUIVIS ─────────────────────────────────────── -->
+    @if (activeTab === 'follows') {
+      @if (followsLoading) {
+        <div class="text-center py-5"><div class="spinner-border text-primary"></div></div>
+      } @else if (followedVendors.length === 0) {
+        <div class="text-center py-5">
+          <i class="ri-user-follow-line display-3 text-muted mb-3 d-block"></i>
+          <h6 class="text-muted">{{ 'PROFILE.NO_VENDORS' | translate }}</h6>
+          <a routerLink="/shop/products" class="btn btn-primary btn-sm mt-2">
+            <i class="ri-store-2-line me-1"></i>{{ 'PROFILE.DISCOVER_SHOP' | translate }}
+          </a>
+        </div>
+      } @else {
         <div class="row g-3">
-          <div class="col-12">
-            <label class="form-label fw-medium fs-13">Mot de passe actuel</label>
-            <div class="position-relative">
-              <input [type]="showCurrent ? 'text' : 'password'"
-                     class="form-control pe-5" [(ngModel)]="passwords.current">
-              <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3 text-muted"
-                      (click)="showCurrent = !showCurrent">
-                <i class="{{showCurrent ? 'ri-eye-off-line' : 'ri-eye-line'}} fs-15"></i>
-              </button>
+          @for (vendor of followedVendors; track vendor.id) {
+            <div class="col-md-6 col-lg-4">
+              <div class="card border shadow-sm h-100" style="border-radius:12px">
+                <div class="card-body p-3">
+                  <div class="d-flex align-items-center gap-3 mb-3">
+                    @if (vendor.profile_picture) {
+                      <img [src]="vendor.profile_picture" class="rounded-circle" style="width:48px;height:48px;object-fit:cover">
+                    } @else {
+                      <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center fw-bold text-white"
+                           style="width:48px;height:48px;font-size:18px;flex-shrink:0">
+                        {{ (vendor.first_name?.[0] || '') + (vendor.last_name?.[0] || '') | uppercase }}
+                      </div>
+                    }
+                    <div class="flex-fill overflow-hidden">
+                      <h6 class="fw-bold mb-0 text-truncate">{{ vendor.shop_name || (vendor.first_name + ' ' + vendor.last_name) }}</h6>
+                      <small class="text-muted">{{ vendor.active_deals }} produit(s) actif(s)</small>
+                      @if (vendor.is_approved) {
+                        <span class="badge bg-success-subtle text-success ms-1 fs-10"><i class="ri-verified-badge-line"></i> Vérifié</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="d-flex gap-2">
+                    <a [routerLink]="['/shop/seller-details', vendor.id]" class="btn btn-sm btn-soft-primary flex-fill">
+                      <i class="ri-store-2-line me-1"></i>{{ 'PROFILE.VIEW_SHOP' | translate }}
+                    </a>
+                    <button class="btn btn-sm btn-soft-danger" (click)="unfollowVendor(vendor.id)" title="Se désabonner">
+                      <i class="ri-user-unfollow-line"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Nouveau mot de passe</label>
-            <div class="position-relative">
-              <input [type]="showNew ? 'text' : 'password'"
-                     class="form-control pe-5" [(ngModel)]="passwords.newPwd">
-              <button type="button" class="btn btn-link position-absolute end-0 top-50 translate-middle-y pe-3 text-muted"
-                      (click)="showNew = !showNew">
-                <i class="{{showNew ? 'ri-eye-off-line' : 'ri-eye-line'}} fs-15"></i>
-              </button>
-            </div>
-          </div>
-          <div class="col-sm-6">
-            <label class="form-label fw-medium fs-13">Confirmer le mot de passe</label>
-            <input type="password" class="form-control" [(ngModel)]="passwords.confirm">
-          </div>
+          }
         </div>
-        <div class="d-flex justify-content-end gap-2 mt-4">
-          <button type="button" class="btn btn-outline-secondary rounded-pill px-4"
-                  (click)="passwordMode = false">Annuler</button>
-          <button type="button" class="btn btn-warning rounded-pill px-4" (click)="savePassword()">
-            <i class="ri-shield-check-line me-1"></i>Confirmer
-          </button>
-        </div>
-      </div>
-    </div>
+      }
     }
-
-    <!-- Preferences -->
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-transparent border-bottom py-3">
-        <h6 class="mb-0 fw-semibold fs-14">
-          <i class="ri-settings-3-line me-2 text-primary"></i>Préférences de notification
-        </h6>
-      </div>
-      <div class="card-body">
-        <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
-          <div>
-            <div class="fw-medium fs-14">Newsletter Tijara</div>
-            <div class="text-muted fs-12">Recevoir les offres et promotions exclusives</div>
-          </div>
-          <div class="form-check form-switch mb-0">
-            <input class="form-check-input" type="checkbox" [(ngModel)]="profile.newsletter"
-                   style="width:44px;height:22px;cursor:pointer">
-          </div>
-        </div>
-        <div class="d-flex align-items-center justify-content-between py-2">
-          <div>
-            <div class="fw-medium fs-14">Notifications commandes</div>
-            <div class="text-muted fs-12">Alertes de suivi et confirmation de livraison</div>
-          </div>
-          <div class="form-check form-switch mb-0">
-            <input class="form-check-input" type="checkbox" [(ngModel)]="profile.notifications"
-                   style="width:44px;height:22px;cursor:pointer">
-          </div>
-        </div>
-      </div>
-    </div>
 
   </div>
 </div>
+
+} <!-- end @if loading -->
+
+<style>
+.profile-banner { position:relative;border-radius:20px;overflow:hidden;height:180px; }
+.profile-banner-bg { position:absolute;inset:0;background:linear-gradient(135deg,#405189 0%,#0ab39c 100%); }
+.profile-banner-content { position:absolute;inset:0;display:flex;align-items:flex-end;gap:20px;padding:0 28px 24px; }
+.profile-avatar-wrap { position:relative;flex-shrink:0; }
+.profile-avatar {
+  width:88px;height:88px;border-radius:50%;border:3px solid #fff;
+  background:linear-gradient(135deg,#405189,#0ab39c);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+.profile-avatar-edit {
+  position:absolute;bottom:0;right:0;width:26px;height:26px;
+  background:#fff;border-radius:50%;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.2);
+  font-size:13px;color:#405189;
+}
+.profile-banner-info { padding-bottom:4px; }
+.nav-tabs-profile { display:flex; border-bottom:2px solid #e9ecef; padding:0; list-style:none; margin:0; gap:4px; }
+.nav-link-profile {
+  border:none; border-bottom:2px solid transparent; border-radius:0;
+  padding:.6rem 1.2rem; color:#74788d; background:transparent;
+  cursor:pointer; font-size:13px; font-weight:500; margin-bottom:-2px;
+  transition:all .2s;
+}
+.nav-link-profile.active { color:#405189; border-bottom-color:#405189; }
+.nav-link-profile:hover:not(.active) { color:#405189; background:#f8f9fa; }
+</style>
