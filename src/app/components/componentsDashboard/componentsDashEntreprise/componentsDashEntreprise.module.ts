@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule, Routes } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 
 import {
   NgbToastModule, NgbProgressbarModule, NgbDropdownModule, NgbTooltipModule
@@ -52,6 +53,7 @@ const routes: Routes = [
     NgbTooltipModule,
     NgApexchartsModule,
     SharedModule,
+    TranslateModule,
     RouterModule.forChild(routes),
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA]
