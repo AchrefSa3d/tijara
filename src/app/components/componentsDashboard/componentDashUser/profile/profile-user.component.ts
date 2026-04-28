@@ -28,6 +28,9 @@ export class ProfileUserComponent implements OnInit {
   showConPwd  = false;
 
   profilePicture = '';
+  uploadedImageUrl = ''; // URL retournée par le serveur
+  uploading = false;
+  uploadError = '';
   ordersStats = { total: 0, delivered: 0, pending: 0, totalSpent: 0 };
   followedVendors: any[] = [];
   followsLoading = false;
@@ -162,9 +165,29 @@ export class ProfileUserComponent implements OnInit {
     if (!input.files?.length) return;
     const file = input.files[0];
     if (file.size > 2 * 1024 * 1024) { alert('Image trop grande (max 2MB).'); return; }
+    
+    // Afficher preview immédiatement
     const reader = new FileReader();
     reader.onload = (e: any) => { this.profilePicture = e.target.result; };
     reader.readAsDataURL(file);
+    
+    // Uploader le fichier au serveur
+    this.uploading = true;
+    this.uploadError = '';
+    this.api.uploadImage(file, 'users').subscribe({
+      next: (response: any) => {
+        this.uploadedImageUrl = response.url || response.imageUrl || response.path || '';
+        this.uploading = false;
+        console.log('Image uploadée:', this.uploadedImageUrl);
+      },
+      error: (error: any) => {
+        this.uploading = false;
+        this.uploadError = error?.error?.message || 'Erreur lors du téléchargement de l\'image.';
+        this.profilePicture = '';
+        this.uploadedImageUrl = '';
+        input.value = '';
+      }
+    });
   }
 
   saveProfile() {
@@ -182,7 +205,7 @@ export class ProfileUserComponent implements OnInit {
       phone:           v.phone,
       city:            v.city,
       address:         v.address,
-      profile_picture: this.profilePicture || null,
+      profile_picture: this.uploadedImageUrl || null, // Utiliser l'URL du serveur
       birth_date:      v.birthDate  || null,
       gender:          v.gender     || null,
     }).subscribe({
@@ -190,6 +213,7 @@ export class ProfileUserComponent implements OnInit {
         this.saving    = false;
         this.translate.get('PROFILE.SAVE_CHANGES').subscribe(t => this.saveMsg = t + ' ✓');
         this.submitted = false;
+        this.uploadedImageUrl = '';
         this.updateLocalStorage(res.user);
         setTimeout(() => this.saveMsg = '', 4000);
       },

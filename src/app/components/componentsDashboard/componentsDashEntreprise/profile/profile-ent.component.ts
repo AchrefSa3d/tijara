@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
 import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 
 @Component({
@@ -11,26 +10,31 @@ import { TijaraApiService } from 'src/app/core/services/tijara-api.service';
 })
 export class ProfileEntComponent implements OnInit {
 
-  breadCrumbItems: any[] = [];
+  breadCrumbItems = [
+    { label: 'Vendeur' },
+    { label: 'Mon Profil', active: true }
+  ];
 
   activeTab: 'infos' | 'boutique' | 'securite' = 'infos';
   infoForm!: FormGroup;
   shopForm!: FormGroup;
   pwdForm!: FormGroup;
 
-  submitted      = false;
-  shopSubmit     = false;
-  pwdSubmit      = false;
-  saving         = false;
-  saveMsg        = '';
-  saveError      = '';
+  submitted    = false;
+  shopSubmit   = false;
+  pwdSubmit    = false;
+  saving       = false;
+  saveMsg      = '';
+  saveError    = '';
   showCurrentPwd = false;
   showNewPwd     = false;
   showConfirmPwd = false;
   loading        = true;
 
   profilePicture = '';
+  uploadedImageUrl = ''; // URL retournée par le serveur
   uploading      = false;
+  uploadError    = '';
 
   wilayas = [
     'Tunis','Ariana','Ben Arous','Manouba','Nabeul','Sousse','Sfax',
@@ -38,20 +42,9 @@ export class ProfileEntComponent implements OnInit {
     'Gabès','Médenine','Gafsa','Tozeur','Kébili','Tataouine','Kasserine','Hammamet'
   ];
 
-  constructor(
-    private fb: FormBuilder,
-    private api: TijaraApiService,
-    private translate: TranslateService
-  ) {}
+  constructor(private fb: FormBuilder, private api: TijaraApiService) {}
 
   ngOnInit(): void {
-    // Translate breadcrumb dynamically
-    this.translate.get(['PROFILE.VENDOR_LABEL', 'PROFILE.TEXT']).subscribe(t => {
-      this.breadCrumbItems = [
-        { label: t['PROFILE.VENDOR_LABEL'] },
-        { label: t['PROFILE.TEXT'], active: true }
-      ];
-    });
     this.buildForms();
     this.loadProfile();
   }
@@ -60,7 +53,7 @@ export class ProfileEntComponent implements OnInit {
     this.infoForm = this.fb.group({
       firstName: ['', [Validators.required, Validators.minLength(2)]],
       lastName:  ['', [Validators.required, Validators.minLength(2)]],
-      phone:     [''],
+      phone:     [''],  // optional – validated only if non-empty in template
       city:      [''],
       address:   [''],
     });
@@ -88,8 +81,8 @@ export class ProfileEntComponent implements OnInit {
           address:   u.address    || '',
         });
         this.shopForm.patchValue({
-          shopName:      u.shop_name      || '',
-          companyNumber: u.company_number || '',
+          shopName:      u.shop_name       || '',
+          companyNumber: u.company_number  || '',
         });
         this.loading = false;
       },
@@ -112,9 +105,32 @@ export class ProfileEntComponent implements OnInit {
     if (!input.files?.length) return;
     const file = input.files[0];
     if (file.size > 2 * 1024 * 1024) { alert('Image trop grande (max 2MB).'); return; }
+    
+    // Afficher preview immédiatement
     const reader = new FileReader();
-    reader.onload = (e: any) => { this.profilePicture = e.target.result; };
+    reader.onload = (e: any) => {
+      this.profilePicture = e.target.result;
+    };
     reader.readAsDataURL(file);
+    
+    // Uploader le fichier au serveur
+    this.uploading = true;
+    this.uploadError = '';
+    this.api.uploadImage(file, 'users').subscribe({
+      next: (response: any) => {
+        this.uploadedImageUrl = response.url || response.imageUrl || response.path || '';
+        this.uploading = false;
+        console.log('Image uploadée:', this.uploadedImageUrl);
+      },
+      error: (error: any) => {
+        this.uploading = false;
+        this.uploadError = error?.error?.message || 'Erreur lors du téléchargement de l\'image.';
+        console.error('Erreur upload:', error);
+        this.profilePicture = '';
+        this.uploadedImageUrl = '';
+        input.value = '';
+      }
+    });
   }
 
   saveInfos() {
@@ -131,13 +147,14 @@ export class ProfileEntComponent implements OnInit {
       phone:           v.phone,
       city:            v.city,
       address:         v.address,
-      profile_picture: this.profilePicture || null,
+      profile_picture: this.uploadedImageUrl || null, // Utiliser l'URL du serveur
     }).subscribe({
       next: (res: any) => {
-        this.saving    = false;
-        this.saveMsg   = 'Informations mises à jour avec succès.';
-        this.submitted = false;
+        this.saving  = false;
+        this.saveMsg = 'Informations mises à jour avec succès.';
         this.updateLocalStorage(res.user);
+        this.submitted = false;
+        this.uploadedImageUrl = '';
         setTimeout(() => this.saveMsg = '', 4000);
       },
       error: (err: any) => {

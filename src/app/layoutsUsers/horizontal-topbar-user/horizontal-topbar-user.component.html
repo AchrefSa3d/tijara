@@ -18,92 +18,133 @@
         </button>
     </div>
 
-    <div id="scrollbar">
-        <div class="container-fluid">
+    <!-- MENU HORIZONTAL CLIENT RÉORGANISÉ -->
+    <div class="container-fluid px-0">
+        <nav class="navbar navbar-expand-md navbar-light bg-light border-bottom" style="background: #f8f9fa !important; min-height: 50px;">
+            <div class="container-fluid px-3">
+                <!-- Toggle Button Mobile -->
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarClientMenu" aria-controls="navbarClientMenu" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <div id="two-column-menu">
+                <div class="collapse navbar-collapse" id="navbarClientMenu">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0" id="navbar-nav">
+                        
+                        <!-- 🏠 ESPACE PERSONNEL -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-600" href="#" id="espacePersBtn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-home-heart-line me-1"></i>Espace personnel
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="espacePersBtn">
+                                <li><a class="dropdown-item" routerLink="/users/dashboard" (click)="updateActive($event)">
+                                    <i class="ri-dashboard-2-line me-2"></i>Tableau de bord
+                                </a></li>
+                            </ul>
+                        </li>
+
+                        <!-- 🛍️ BOUTIQUE -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-600" href="#" id="boutiqueBtn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-store-2-line me-1"></i>Boutique
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="boutiqueBtn">
+                                <li><a class="dropdown-item" routerLink="/landing/produits" (click)="updateActive($event)">
+                                    <i class="ri-shopping-bag-3-line me-2"></i>Tous les produits
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/landing/annonces" (click)="updateActive($event)">
+                                    <i class="ri-megaphone-line me-2"></i>Annonces
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/landing/deals" (click)="updateActive($event)">
+                                    <i class="ri-flashlight-line me-2"></i>Deals & Promos
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/landing/vendeurs" (click)="updateActive($event)">
+                                    <i class="ri-store-3-line me-2"></i>Vendeurs
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" routerLink="/shop/cart" (click)="updateActive($event)">
+                                    <i class="ri-shopping-cart-2-line me-2"></i>Mon panier
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/users/wishlist" (click)="updateActive($event)">
+                                    <i class="ri-heart-line me-2"></i>Mes favoris
+                                </a></li>
+                            </ul>
+                        </li>
+
+                        <!-- 🛒 MES ACHATS -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-600" href="#" id="achatsBtn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-file-list-3-line me-1"></i>Mes achats
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="achatsBtn">
+                                <li><a class="dropdown-item" routerLink="/users/orders" (click)="updateActive($event)">
+                                    <i class="ri-shopping-bag-3-line me-2"></i>Commandes
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/users/my-invoices" (click)="updateActive($event)">
+                                    <i class="ri-file-text-line me-2"></i>Factures
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/users/my-deliveries" (click)="updateActive($event)">
+                                    <i class="ri-truck-line me-2"></i>Livraisons
+                                </a></li>
+                            </ul>
+                        </li>
+
+                        <!-- 📢 MES PUBLICATIONS -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-600" href="#" id="publicationsBtn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-megaphone-line me-1"></i>Mes publications
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="publicationsBtn">
+                                <li><a class="dropdown-item" routerLink="/users/annonces" (click)="updateActive($event)">
+                                    <i class="ri-add-circle-line me-2"></i>Publier / Parcourir
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/users/my-products" (click)="updateActive($event)">
+                                    <i class="ri-article-line me-2"></i>Mes annonces publiées
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/users/my-reviews" (click)="updateActive($event)">
+                                    <i class="ri-star-line me-2"></i>Mes avis
+                                </a></li>
+                            </ul>
+                        </li>
+
+                        <!-- 🎁 AVANTAGES -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-600" href="#" id="avantagesBtn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-coupon-2-line me-1"></i>Avantages
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="avantagesBtn">
+                                <li><a class="dropdown-item" routerLink="/users/coupons" (click)="updateActive($event)">
+                                    <i class="ri-coupon-2-line me-2"></i>Coupons PROMO
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/users/prizes" (click)="updateActive($event)">
+                                    <i class="ri-trophy-line me-2"></i>Prix & tirages
+                                </a></li>
+                            </ul>
+                        </li>
+
+                        <!-- 💬 COMMUNAUTÉ -->
+                        <li class="nav-item">
+                            <a class="nav-link fw-600" routerLink="/users/messages" (click)="updateActive($event)">
+                                <i class="ri-chat-3-line me-1"></i>Messagerie
+                            </a>
+                        </li>
+
+                        <!-- 👤 MON COMPTE -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle fw-600" href="#" id="compteBtn" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="ri-user-settings-line me-1"></i>Mon compte
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="compteBtn">
+                                <li><a class="dropdown-item" routerLink="/users/profile" (click)="updateActive($event)">
+                                    <i class="ri-user-settings-line me-2"></i>Mon profil
+                                </a></li>
+                                <li><a class="dropdown-item" routerLink="/users/reclamations" (click)="updateActive($event)">
+                                    <i class="ri-customer-service-2-line me-2"></i>Réclamations
+                                </a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <ul class="navbar-nav" id="navbar-nav">
-                @for(item of menuItems; track $index){
-                @if(item.isTitle){
-                <li class="menu-title"><span data-key="t-menu">{{ item.label | translate }}</span></li>
-                }@else {
-                <li class="nav-item">
-                    @if(hasItems(item)){
-                    <a href="javascript:void(0);" class="is-parent nav-link menu-link" [ngClass]="{'has-arrow': !item.badge, 'has-dropdown': item.badge}" data-bs-toggle="collapse" aria-expanded="false" (click)="toggleItem($event)">
-                        <i class="{{ item.icon }} icon nav-icon" class=""></i>
-                        <span class=""> {{ item.label | translate }}</span>
-                        @if(item.badge){<span class="badge badge-pill {{item.badge.variant}}">{{item.badge.text
-                            | translate}}</span>}
-                    </a>
-
-                    <div class="collapse menu-dropdown" [ngClass]="{'mega-dropdown-menu':item.label === 'MENUITEMS.BASEUI.TEXT'}" id="sidebarDashboards">
-                        <div [ngClass]="{'row':item.label == 'MENUITEMS.BASEUI.TEXT'}">
-                            @for(subitem of item.subItems; track $index){
-                            <div [ngClass]="{'col-lg-4': item.label == 'MENUITEMS.BASEUI.TEXT'}">
-                                <ul class="nav nav-sm flex-column" aria-expanded="false">
-                                    <li class="nav-item">
-                                        @if(hasItems(subitem)){
-                                        <a class="nav-link" href="javascript:void(0);" [attr.data-parent]="subitem.parentId" data-bs-toggle="collapse" aria-expanded="false" (click)="toggleSubItem($event)">
-                                            @if(subitem.icon){<i class="bx {{ subitem.icon }} icon nav-icon" class=""></i>}{{ subitem.label | translate}}
-                                        </a>
-
-                                        <div class="collapse menu-dropdown">
-                                            <ul class="nav nav-sm flex-column" aria-expanded="false">
-                                                @for(subSubitem of subitem.subItems; track $index){
-                                                <li class="nav-item">
-                                                    @if(subSubitem.childItem){
-                                                    <a [attr.data-parent]="subSubitem.parentId" [routerLink]="subSubitem.link" data-bs-toggle="collapse" aria-expanded="false" class="nav-link" (click)="updateActive($event)">
-                                                        {{ subSubitem.label | translate }}
-                                                    </a>
-                                                    <div class="collapse menu-dropdown">
-                                                        <ul class="nav nav-sm flex-column" aria-expanded="false">
-                                                            @for(subChilditem of subSubitem.childItem; track $index){
-                                                            <li class="nav-item">
-                                                                <a [attr.data-parent]="subSubitem.parentId" [routerLink]="subChilditem.link" class="nav-link" (click)="updateActive($event)">
-                                                                    {{ subChilditem.label | translate }}
-                                                                </a>
-                                                            </li>
-                                                            }
-                                                        </ul>
-                                                    </div>
-                                                    }@else{
-                                                    <a [attr.data-parent]="subSubitem.parentId" [routerLink]="subSubitem.link" class="nav-link" (click)="updateActive($event)">
-                                                        {{ subSubitem.label | translate }}
-                                                    </a>
-                                                    }
-
-                                                </li>
-                                                }
-                                            </ul>
-                                        </div>
-                                        }@else {
-                                        <a [routerLink]="subitem.link" class="nav-link" [attr.data-parent]="subitem.parentId" (click)="updateActive($event)">
-                                            @if(subitem.icon){<i class="bx {{ subitem.icon }} icon nav-icon" class=""></i>}{{ subitem.label | translate}}
-                                        </a>
-                                        }
-                                    </li>
-                                </ul>
-
-
-                            </div>
-                            }
-                        </div>
-
-                    </div>
-                    }@else{
-                    <a [routerLink]="item.link" class="side-nav-link-ref nav-link menu-link 123">
-                        @if(item.icon){<i class="bx {{ item.icon }} icon nav-icon" class=""></i>}
-                        <span class=""> {{ item.label | translate }}</span>
-                        @if(item.badge){<span class="badge {{item.badge.variant}} float-end">{{item.badge.text |
-                            translate}}</span>}
-                    </a>
-                    }
-                </li>
-                }
-                }
-            </ul>
-        </div>
-        <!-- Sidebar -->
+        </nav>
     </div>
 </div>

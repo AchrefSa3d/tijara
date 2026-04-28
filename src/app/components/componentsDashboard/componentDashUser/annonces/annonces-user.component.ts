@@ -23,6 +23,9 @@ export class AnnoncesUserComponent implements OnInit {
   submitSuccess        = '';
   submitError          = '';
   imagePreview         = '';
+  uploadedImageUrl     = ''; // URL retournée par le serveur
+  uploading            = false;
+  uploadError          = '';
   expandedComments: Record<number, boolean> = {};
   comments: Record<number, any[]>           = {};
   commentText: Record<number, string>       = {};
@@ -66,22 +69,46 @@ export class AnnoncesUserComponent implements OnInit {
     const file = (event.target as HTMLInputElement).files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) { alert('Max 2 MB'); return; }
+    
+    // Afficher preview immédiatement
     const reader = new FileReader();
     reader.onload = (e: any) => { this.imagePreview = e.target.result; };
     reader.readAsDataURL(file);
+    
+    // Uploader le fichier au serveur
+    this.uploading = true;
+    this.uploadError = '';
+    this.api.uploadImage(file, 'annonces').subscribe({
+      next: (response: any) => {
+        this.uploadedImageUrl = response.url || response.imageUrl || response.path || '';
+        this.uploading = false;
+        console.log('Image uploadée:', this.uploadedImageUrl);
+      },
+      error: (error: any) => {
+        this.uploading = false;
+        this.uploadError = error?.error?.message || 'Erreur lors du téléchargement de l\'image.';
+        this.imagePreview = '';
+        this.uploadedImageUrl = '';
+      }
+    });
   }
 
   submit(): void {
     if (this.annonceForm.invalid) return;
     this.submitting = true;
     this.submitError = '';
-    const payload = { ...this.annonceForm.value, image_url: this.imagePreview || null, type: 'annonce' };
+    const payload = { 
+      ...this.annonceForm.value, 
+      image_url: this.uploadedImageUrl || null, // Utiliser l'URL du serveur
+      type: 'annonce' 
+    };
     this.api.createAnnonce(payload).subscribe({
       next: () => {
         this.submitting    = false;
         this.showForm      = false;
         this.submitSuccess = 'Annonce soumise avec succès ! Elle sera visible après validation par l\'administrateur.';
         this.imagePreview  = '';
+        this.uploadedImageUrl = '';
         this.annonceForm.reset();
         this.loadMine();
         setTimeout(() => { this.submitSuccess = ''; }, 6000);
